@@ -7,15 +7,12 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f4f6f9; padding: 20px; }
-  
   .dashboard { max-width: 1200px; margin: 0 auto; }
-  
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .header h1 { font-size: 24px; color: #1a1a2e; }
   .header .summary { display: flex; gap: 16px; }
   .header .summary .badge { background: #fff; border-radius: 8px; padding: 8px 16px; font-size: 14px; color: #555; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
   .header .summary .badge strong { color: #1a1a2e; font-size: 18px; }
-  
   .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
   .btn-primary { background: #4361ee; color: #fff; }
   .btn-primary:hover { background: #3a56d4; }
@@ -27,29 +24,20 @@
   .btn-secondary:hover { background: #9ba3ab; }
   .btn-export { background: #06d6a0; color: #fff; }
   .btn-export:hover { background: #05c090; }
-  
   .controls { display: flex; gap: 8px; flex-wrap: wrap; }
-  
   .table-wrap { overflow-x: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   table { width: 100%; border-collapse: collapse; min-width: 900px; }
   thead th { background: #1a1a2e; color: #fff; padding: 14px 12px; font-size: 13px; text-align: left; white-space: nowrap; }
   tbody td { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
   tbody tr:hover { background: #f0f4ff; }
-  
   .stage-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #fff; }
   .stage-s1 { background: #adb5bd; }
   .stage-s2 { background: #f8961e; }
   .stage-s3 { background: #4361ee; }
   .stage-s4 { background: #7209b7; }
   .stage-s5 { background: #06d6a0; }
-  
-  .history-list { font-size: 11px; color: #777; margin-top: 4px; }
-  .history-item { margin-top: 2px; }
-  
   .note-text { font-size: 12px; color: #888; max-width: 150px; }
   .amount-text { font-weight: 700; color: #4361ee; }
-  
-  /* Modal */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
   .modal-overlay.active { display: flex; }
   .modal { background: #fff; border-radius: 16px; padding: 32px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
@@ -59,14 +47,11 @@
   .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
   .form-group textarea { height: 60px; resize: vertical; }
   .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-  
-  /* History Modal */
   .history-modal-list { list-style: none; }
   .history-modal-list li { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .history-modal-list li:last-child { border-bottom: none; }
-  
   .empty-state { text-align: center; padding: 60px 20px; color: #aaa; font-size: 16px; }
-  
+  .loading { text-align: center; padding: 40px; color: #888; font-size: 16px; }
   @media (max-width: 768px) {
     .header { flex-direction: column; align-items: flex-start; }
     .header .summary { flex-wrap: wrap; }
@@ -77,7 +62,6 @@
 <body>
 
 <div class="dashboard">
-  <!-- Header -->
   <div class="header">
     <h1>딜 현황 대시보드</h1>
     <div class="summary">
@@ -85,14 +69,10 @@
       <div class="badge">총 금액 <strong id="totalAmount">0</strong>억</div>
     </div>
   </div>
-  
   <div class="controls" style="margin-bottom: 16px;">
     <button class="btn btn-primary" onclick="openAddModal()">+ 딜 추가</button>
     <button class="btn btn-export" onclick="exportJSON()">JSON 내보내기</button>
-    <button class="btn btn-secondary" onclick="importJSON()">JSON 불러오기</button>
   </div>
-
-  <!-- Table -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -111,6 +91,7 @@
         </tr>
       </thead>
       <tbody id="dealTableBody">
+        <tr><td colspan="11" class="loading">데이터 불러오는 중...</td></tr>
       </tbody>
     </table>
     <div id="emptyState" class="empty-state" style="display:none;">
@@ -119,12 +100,10 @@
   </div>
 </div>
 
-<!-- Add/Edit Modal -->
 <div class="modal-overlay" id="dealModal">
   <div class="modal">
     <h2 id="modalTitle">딜 추가</h2>
     <input type="hidden" id="editId">
-    
     <div class="form-group">
       <label>회사명 *</label>
       <input type="text" id="inputName" placeholder="예: (주)아이메디">
@@ -180,7 +159,6 @@
       <label>비고</label>
       <textarea id="inputNote" placeholder="메모 입력"></textarea>
     </div>
-    
     <div class="form-actions">
       <button class="btn btn-secondary" onclick="closeModal()">취소</button>
       <button class="btn btn-primary" onclick="saveDeal()">저장</button>
@@ -188,7 +166,6 @@
   </div>
 </div>
 
-<!-- History Modal -->
 <div class="modal-overlay" id="historyModal">
   <div class="modal">
     <h2 id="historyTitle">진행 이력</h2>
@@ -199,109 +176,55 @@
   </div>
 </div>
 
-<!-- Hidden file input -->
-<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-// Stage labels
+firebase.initializeApp({
+  apiKey: "AIzaSyCgbT4EtCslRDIa2A1BsQHgoZcgJ97aJmU",
+  authDomain: "deal-dashboard-f9805.firebaseapp.com",
+  projectId: "deal-dashboard-f9805",
+  storageBucket: "deal-dashboard-f9805.firebasestorage.app",
+  messagingSenderId: "219848294450",
+  appId: "1:219848294450:web:58d3fc2fe65d40d8ee3c2b"
+});
+
+const db = firebase.firestore();
+const dealsRef = db.collection('deals');
+
 const STAGE_LABELS = {
-  s1: 'S1 - 발굴',
-  s2: 'S2 - 검토',
-  s3: 'S3 - 실사',
-  s4: 'S4 - 협상',
-  s5: 'S5 - 완료'
+  s1: 'S1 - 발굴', s2: 'S2 - 검토', s3: 'S3 - 실사', s4: 'S4 - 협상', s5: 'S5 - 완료'
 };
 
-// Initialize data
-let dealData = {
-  companies: [
-    {
-      id: "c1",
-      name: "(주)아이메디",
-      sector: "소비재",
-      amount: 30,
-      history: [{ stage: "s3", date: "2026-04-28" }],
-      plannedNext: { stage: "s5", date: "2026-04-30" },
-      note: ""
-    },
-    {
-      id: "c2",
-      name: "투디엠",
-      sector: "소재",
-      amount: 20,
-      history: [{ stage: "s3", date: "2026-05-07" }],
-      plannedNext: { stage: "s5", date: "2026-05-15" },
-      note: "납입 5월 중순(추정)"
-    },
-    {
-      id: "c3",
-      name: "어썸레이",
-      sector: "반도체",
-      amount: 10,
-      history: [{ stage: "s3", date: "2026-05-07" }],
-      plannedNext: { stage: "s5", date: null },
-      note: "납입일 미정"
-    },
-    {
-      id: "c4",
-      name: "코스모웍스",
-      sector: "미분류",
-      amount: 20,
-      history: [{ stage: "s3", date: "2026-05-07" }],
-      plannedNext: { stage: "s5", date: "2026-05-11" },
-      note: ""
-    },
-    {
-      id: "c5",
-      name: "데브크라",
-      sector: "AI",
-      amount: 20,
-      history: [{ stage: "s3", date: "2026-05-07" }],
-      plannedNext: { stage: "s5", date: null },
-      note: "납입일 미정"
-    }
-  ]
-};
+let companies = [];
 
-// Load from localStorage if exists
-const saved = localStorage.getItem('dealData');
-if (saved) {
-  try { dealData = JSON.parse(saved); } catch(e) {}
-}
-
-function saveToStorage() {
-  localStorage.setItem('dealData', JSON.stringify(dealData));
-}
-
-function generateId() {
-  return 'c' + Date.now();
-}
-
-function getLatestHistory(company) {
-  if (!company.history || company.history.length === 0) return { stage: '-', date: '-' };
-  return company.history[company.history.length - 1];
-}
+// 실시간 리스너 - 다른 사람이 수정하면 자동 반영
+dealsRef.orderBy('name').onSnapshot(snapshot => {
+  companies = [];
+  snapshot.forEach(doc => {
+    companies.push({ id: doc.id, ...doc.data() });
+  });
+  renderTable();
+});
 
 function renderTable() {
   const tbody = document.getElementById('dealTableBody');
   const empty = document.getElementById('emptyState');
-  const companies = dealData.companies;
-  
   document.getElementById('totalCount').textContent = companies.length;
-  document.getElementById('totalAmount').textContent = companies.reduce((sum, c) => sum + (c.amount || 0), 0);
-  
+  document.getElementById('totalAmount').textContent = companies.reduce((s, c) => s + (c.amount || 0), 0);
+
   if (companies.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-  
+
   tbody.innerHTML = companies.map((c, i) => {
-    const latest = getLatestHistory(c);
-    const nextStage = c.plannedNext?.stage || '-';
-    const nextDate = c.plannedNext?.date || '미정';
-    
+    const hist = c.history || [];
+    const latest = hist.length > 0 ? hist[hist.length - 1] : { stage: '-', date: '-' };
+    const ns = c.plannedNext?.stage || '-';
+    const nd = c.plannedNext?.date || '미정';
     return `<tr>
       <td>${i + 1}</td>
       <td><strong>${c.name}</strong></td>
@@ -309,10 +232,10 @@ function renderTable() {
       <td class="amount-text">${c.amount}억</td>
       <td><span class="stage-badge stage-${latest.stage}">${STAGE_LABELS[latest.stage] || latest.stage}</span></td>
       <td>${latest.date || '-'}</td>
-      <td><span class="stage-badge stage-${nextStage}">${STAGE_LABELS[nextStage] || nextStage}</span></td>
-      <td>${nextDate}</td>
+      <td><span class="stage-badge stage-${ns}">${STAGE_LABELS[ns] || ns}</span></td>
+      <td>${nd}</td>
       <td class="note-text">${c.note || '-'}</td>
-      <td><button class="btn btn-secondary" onclick="showHistory('${c.id}')">이력(${c.history?.length || 0})</button></td>
+      <td><button class="btn btn-secondary" onclick="showHistory('${c.id}')">이력(${hist.length})</button></td>
       <td>
         <div style="display:flex;gap:4px;">
           <button class="btn btn-edit" onclick="openEditModal('${c.id}')">수정</button>
@@ -323,7 +246,6 @@ function renderTable() {
   }).join('');
 }
 
-// Modal controls
 function openAddModal() {
   document.getElementById('modalTitle').textContent = '딜 추가';
   document.getElementById('editId').value = '';
@@ -339,11 +261,10 @@ function openAddModal() {
 }
 
 function openEditModal(id) {
-  const c = dealData.companies.find(x => x.id === id);
+  const c = companies.find(x => x.id === id);
   if (!c) return;
-  
-  const latest = getLatestHistory(c);
-  
+  const hist = c.history || [];
+  const latest = hist.length > 0 ? hist[hist.length - 1] : {};
   document.getElementById('modalTitle').textContent = '딜 수정';
   document.getElementById('editId').value = id;
   document.getElementById('inputName').value = c.name;
@@ -361,7 +282,7 @@ function closeModal() {
   document.getElementById('dealModal').classList.remove('active');
 }
 
-function saveDeal() {
+async function saveDeal() {
   const id = document.getElementById('editId').value;
   const name = document.getElementById('inputName').value.trim();
   const sector = document.getElementById('inputSector').value;
@@ -371,63 +292,58 @@ function saveDeal() {
   const nextStage = document.getElementById('inputNextStage').value || null;
   const nextDate = document.getElementById('inputNextDate').value || null;
   const note = document.getElementById('inputNote').value.trim();
-  
+
   if (!name) { alert('회사명을 입력해 주세요.'); return; }
   if (!amount) { alert('금액을 입력해 주세요.'); return; }
-  
-  if (id) {
-    // Edit
-    const c = dealData.companies.find(x => x.id === id);
-    if (!c) return;
-    c.name = name;
-    c.sector = sector;
-    c.amount = amount;
-    c.note = note;
-    
-    const latest = getLatestHistory(c);
-    if (latest.stage !== stage || latest.date !== date) {
-      c.history.push({ stage: stage, date: date });
+
+  try {
+    if (id) {
+      const c = companies.find(x => x.id === id);
+      const hist = c.history || [];
+      const latest = hist.length > 0 ? hist[hist.length - 1] : {};
+      if (latest.stage !== stage || latest.date !== date) {
+        hist.push({ stage, date });
+      }
+      await dealsRef.doc(id).update({
+        name, sector, amount, note,
+        history: hist,
+        plannedNext: { stage: nextStage, date: nextDate }
+      });
+    } else {
+      await dealsRef.add({
+        name, sector, amount, note,
+        history: [{ stage, date }],
+        plannedNext: { stage: nextStage, date: nextDate }
+      });
     }
-    c.plannedNext = { stage: nextStage, date: nextDate };
-  } else {
-    // Add
-    dealData.companies.push({
-      id: generateId(),
-      name: name,
-      sector: sector,
-      amount: amount,
-      history: [{ stage: stage, date: date }],
-      plannedNext: { stage: nextStage, date: nextDate },
-      note: note
-    });
+    closeModal();
+  } catch (err) {
+    alert('저장 오류: ' + err.message);
   }
-  
-  saveToStorage();
-  renderTable();
-  closeModal();
 }
 
-function deleteDeal(id) {
-  const c = dealData.companies.find(x => x.id === id);
+async function deleteDeal(id) {
+  const c = companies.find(x => x.id === id);
   if (!c) return;
   if (!confirm(`"${c.name}" 딜을 삭제하시겠습니까?`)) return;
-  dealData.companies = dealData.companies.filter(x => x.id !== id);
-  saveToStorage();
-  renderTable();
+  try {
+    await dealsRef.doc(id).delete();
+  } catch (err) {
+    alert('삭제 오류: ' + err.message);
+  }
 }
 
-// History modal
 function showHistory(id) {
-  const c = dealData.companies.find(x => x.id === id);
+  const c = companies.find(x => x.id === id);
   if (!c) return;
   document.getElementById('historyTitle').textContent = `${c.name} 진행 이력`;
   const list = document.getElementById('historyList');
-  
-  if (!c.history || c.history.length === 0) {
+  const hist = c.history || [];
+  if (hist.length === 0) {
     list.innerHTML = '<li>이력이 없습니다.</li>';
   } else {
-    list.innerHTML = c.history.map((h, i) => 
-      `<li><strong>${STAGE_LABELS[h.stage] || h.stage}</strong> — ${h.date || '날짜 미정'}${i === c.history.length - 1 ? ' (현재)' : ''}</li>`
+    list.innerHTML = hist.map((h, i) =>
+      `<li><strong>${STAGE_LABELS[h.stage] || h.stage}</strong> — ${h.date || '날짜 미정'}${i === hist.length - 1 ? ' (현재)' : ''}</li>`
     ).join('');
   }
   document.getElementById('historyModal').classList.add('active');
@@ -437,48 +353,16 @@ function closeHistoryModal() {
   document.getElementById('historyModal').classList.remove('active');
 }
 
-// JSON Export
 function exportJSON() {
-  const blob = new Blob([JSON.stringify(dealData, null, 2)], { type: 'application/json' });
+  const data = { companies: companies.map(c => { const { id, ...rest } = c; return rest; }) };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'deal_data_' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'deal_data_' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
   URL.revokeObjectURL(url);
 }
-
-// JSON Import
-function importJSON() {
-  document.getElementById('fileInput').click();
-}
-
-function handleFileImport(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (imported.companies && Array.isArray(imported.companies)) {
-        dealData = imported;
-        saveToStorage();
-        renderTable();
-        alert('JSON 파일을 성공적으로 불러왔습니다!');
-      } else {
-        alert('올바른 딜 데이터 형식이 아닙니다.');
-      }
-    } catch(err) {
-      alert('JSON 파일 파싱 오류: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-// Initial render
-renderTable();
 </script>
-
 </body>
 </html>
