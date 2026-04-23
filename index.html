@@ -17,6 +17,7 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 .btn:hover{background:#f0f0f0;}
 .btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
 .btn-primary:hover{background:#333;}
+.btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:16px;}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
 .summary-card{background:#fff;border-radius:14px;padding:18px 16px;border:1px solid #eee;}
 .summary-card .label{font-size:0.75rem;color:#999;margin-bottom:4px;}
@@ -44,16 +45,29 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 .company-cards{margin-bottom:28px;}
 .company-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid #eee;cursor:pointer;transition:box-shadow .2s;}
 .company-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.company-card .c-header{display:flex;justify-content:space-between;align-items:flex-start;}
 .company-card .c-name{font-size:1rem;font-weight:700;}
 .company-card .c-sector{font-size:0.8rem;color:#999;margin-bottom:4px;}
 .company-card .c-amount{font-size:1.1rem;font-weight:700;margin-bottom:4px;}
 .company-card .c-date{font-size:0.78rem;color:#aaa;margin-bottom:8px;}
+.company-card .c-manager{font-size:0.75rem;color:#666;background:#f0f0f0;display:inline-block;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
 .progress-bar{height:6px;border-radius:3px;background:#eee;display:flex;overflow:hidden;gap:2px;}
 .progress-bar .seg{height:100%;border-radius:3px;flex:1;}
 .seg-done{background:#4ade80;}
 .seg-current{background:#3b82f6;}
 .seg-future{background:#e0e0e0;}
 .footer-note{text-align:center;font-size:0.75rem;color:#bbb;padding:20px 0;}
+/* Filter tabs */
+.filter-row{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-tab{padding:6px 14px;border-radius:16px;border:1.5px solid #ddd;background:#fff;font-size:0.8rem;cursor:pointer;font-weight:500;transition:all .2s;color:#666;}
+.filter-tab:hover{background:#f0f0f0;}
+.filter-tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+/* Manager badge colors */
+.manager-badge{font-size:0.72rem;padding:2px 8px;border-radius:10px;display:inline-block;font-weight:500;}
+.manager-badge-0{background:#dbeafe;color:#1e40af;}
+.manager-badge-1{background:#fce7f3;color:#9d174d;}
+.manager-badge-2{background:#d1fae5;color:#065f46;}
+.manager-badge-3{background:#fef3c7;color:#92400e;}
 /* Modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1000;justify-content:center;align-items:center;}
 .modal-overlay.active{display:flex;}
@@ -69,6 +83,14 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 .history-list li:last-child{border-bottom:none;}
 .del-btn{background:none;border:none;color:#d32f2f;cursor:pointer;font-size:0.8rem;font-weight:600;padding:2px 8px;}
 .edit-actions{display:flex;gap:6px;margin-top:12px;}
+/* Manager management */
+.manager-list{margin-bottom:16px;}
+.manager-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f9f9f9;border-radius:10px;margin-bottom:6px;font-size:0.85rem;}
+.manager-item .m-info{display:flex;align-items:center;gap:8px;}
+.manager-item .m-role{font-size:0.75rem;color:#999;}
+.add-manager-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.add-manager-row input{padding:8px 10px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;outline:none;flex:1;min-width:80px;}
+.add-manager-row input:focus{border-color:#1a1a1a;}
 @media(max-width:480px){
 .summary-grid{grid-template-columns:1fr 1fr;}
 .milestone-table{font-size:0.78rem;}
@@ -86,7 +108,9 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
     <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
     <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
+    <button class="btn" onclick="openManagerModal()">담당자 관리</button>
   </div>
+
   <div class="summary-grid">
     <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div></div>
@@ -94,12 +118,15 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
     <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
   </div>
 
+  <!-- 담당자 필터 -->
+  <div class="filter-row" id="filterRow"></div>
+
   <div class="section-title">파이프라인 (5단계) <span class="hint">카드 클릭 시 상세/이력 편집</span></div>
   <div class="pipeline-stages" id="pipelineStages"></div>
 
   <div class="section-title">다음 마일스톤 (임박순)</div>
   <table class="milestone-table">
-    <thead><tr><th>기업명</th><th>섹터</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
+    <thead><tr><th>기업명</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
     <tbody id="milestoneBody"></tbody>
   </table>
 
@@ -117,6 +144,9 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
   <div class="form-group"><label>회사명</label><input id="fName" placeholder="(주)회사명"></div>
   <div class="form-group"><label>섹터</label><input id="fSector" placeholder="소비재, AI, 반도체 등"></div>
   <div class="form-group"><label>금액 (억)</label><input id="fAmount" type="number" placeholder="30"></div>
+  <div class="form-group"><label>담당자</label>
+    <select id="fManager"><option value="">미지정</option></select>
+  </div>
   <div class="form-group"><label>현재 단계</label>
     <select id="fStage"><option value="s1">S1 - 투자팀 IR</option><option value="s2">S2 - 공식 IR</option><option value="s3">S3 - 투자심의위원회</option><option value="s4">S4 - 투자계약</option><option value="s5">S5 - 투자금 납입</option></select>
   </div>
@@ -146,6 +176,22 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 </div>
 </div>
 
+<!-- Manager Modal -->
+<div class="modal-overlay" id="managerModal">
+<div class="modal">
+  <h2>담당자 관리</h2>
+  <div class="manager-list" id="managerList"></div>
+  <div class="add-manager-row">
+    <input id="newManagerName" placeholder="이름">
+    <input id="newManagerRole" placeholder="역할 (예: 심사역)">
+    <button class="btn btn-primary btn-sm" onclick="addManager()">추가</button>
+  </div>
+  <div class="form-actions" style="margin-top:20px;">
+    <button class="btn" onclick="closeManagerModal()">닫기</button>
+  </div>
+</div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -159,18 +205,81 @@ firebase.initializeApp({
 });
 const db=firebase.firestore();
 const dealsRef=db.collection('deals');
+const managersRef=db.collection('managers');
 
 const STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약',s5:'투자금 납입'};
 const STAGE_KEYS=['s1','s2','s3','s4','s5'];
 let companies=[];
+let managers=[];
+let filterManagerId='all'; // 'all' = 전체
 
 document.getElementById('todayDate').textContent='오늘: '+new Date().toISOString().slice(0,10);
 
+// Listen managers
+managersRef.orderBy('name').onSnapshot(snap=>{
+  managers=[];
+  snap.forEach(doc=>managers.push({id:doc.id,...doc.data()}));
+  renderManagerSelect();
+  renderFilterRow();
+  renderAll();
+});
+
+// Listen deals
 dealsRef.orderBy('name').onSnapshot(snap=>{
   companies=[];
   snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));
   renderAll();
 });
+
+function getFilteredCompanies(){
+  if(filterManagerId==='all') return companies;
+  return companies.filter(c=>c.managerId===filterManagerId);
+}
+
+function getManagerName(managerId){
+  if(!managerId) return '미지정';
+  const m=managers.find(x=>x.id===managerId);
+  return m?m.name:'미지정';
+}
+
+function getManagerBadgeClass(managerId){
+  const idx=managers.findIndex(x=>x.id===managerId);
+  return 'manager-badge-'+(idx>=0?idx%4:0);
+}
+
+function getManagerInfo(managerId){
+  if(!managerId) return null;
+  return managers.find(x=>x.id===managerId)||null;
+}
+
+function renderManagerSelect(){
+  const selects=['fManager'];
+  selects.forEach(selId=>{
+    const sel=document.getElementById(selId);
+    if(!sel) return;
+    const curVal=sel.value;
+    sel.innerHTML='<option value="">미지정</option>';
+    managers.forEach(m=>{
+      sel.innerHTML+=`<option value="${m.id}">${m.name} (${m.role||''})</option>`;
+    });
+    sel.value=curVal;
+  });
+}
+
+function renderFilterRow(){
+  const el=document.getElementById('filterRow');
+  let html=`<div class="filter-tab ${filterManagerId==='all'?'active':''}" onclick="setFilter('all')">전체</div>`;
+  managers.forEach(m=>{
+    html+=`<div class="filter-tab ${filterManagerId===m.id?'active':''}" onclick="setFilter('${m.id}')">${m.name}</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function setFilter(id){
+  filterManagerId=id;
+  renderFilterRow();
+  renderAll();
+}
 
 function renderAll(){
   renderSummary();
@@ -181,7 +290,17 @@ function renderAll(){
 
 function getCurrentStage(c){
   if(!c.history||c.history.length===0)return{stage:'s1',date:''};
-  return c.history[c.history.length-1];
+  // history에서 가장 높은 stage 기준 (stage index가 가장 큰 것)
+  let latest=c.history[0];
+  for(let i=1;i<c.history.length;i++){
+    if(getStageIndex(c.history[i].stage)>getStageIndex(latest.stage)){
+      latest=c.history[i];
+    } else if(getStageIndex(c.history[i].stage)===getStageIndex(latest.stage)){
+      // 같은 stage면 날짜가 더 최근인 것
+      if(c.history[i].date>latest.date) latest=c.history[i];
+    }
+  }
+  return latest;
 }
 
 function getStageIndex(s){return STAGE_KEYS.indexOf(s);}
@@ -194,14 +313,14 @@ function getDday(dateStr){
 }
 
 function renderSummary(){
-  document.getElementById('sumCount').textContent=companies.length+'개사';
-  const totalAmt=companies.reduce((s,c)=>s+(c.amount||0),0);
+  const filtered=getFilteredCompanies();
+  document.getElementById('sumCount').textContent=filtered.length+'개사';
+  const totalAmt=filtered.reduce((s,c)=>s+(c.amount||0),0);
   document.getElementById('sumAmount').textContent=totalAmt+'억';
-  document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
+  document.getElementById('sumAmountSub').textContent=filtered.length+'개사 합계';
 
-  // nearest
   let nearest=null,nearestComp=null;
-  companies.forEach(c=>{
+  filtered.forEach(c=>{
     if(c.plannedNext&&c.plannedNext.date){
       const d=getDday(c.plannedNext.date);
       if(d!==null&&d>=0&&(nearest===null||d<nearest)){nearest=d;nearestComp=c;}
@@ -216,8 +335,7 @@ function renderSummary(){
     document.getElementById('sumNearestSub').textContent='';
   }
 
-  // done (s5 완료)
-  const doneComps=companies.filter(c=>getCurrentStage(c).stage==='s5');
+  const doneComps=filtered.filter(c=>getCurrentStage(c).stage==='s5');
   const doneAmt=doneComps.reduce((s,c)=>s+(c.amount||0),0);
   document.getElementById('sumDone').textContent=doneAmt+'억';
   document.getElementById('sumDoneSub').textContent=doneComps.length+'개사';
@@ -225,9 +343,10 @@ function renderSummary(){
 
 function renderPipeline(){
   const el=document.getElementById('pipelineStages');
+  const filtered=getFilteredCompanies();
   let html='';
   STAGE_KEYS.forEach(sk=>{
-    const inStage=companies.filter(c=>getCurrentStage(c).stage===sk);
+    const inStage=filtered.filter(c=>getCurrentStage(c).stage===sk);
     const amt=inStage.reduce((s,c)=>s+(c.amount||0),0);
     html+=`<div class="pipeline-stage"><div class="stage-name">${STAGES[sk]}</div><div class="stage-stat">${inStage.length}개사 · ${amt}억</div></div>`;
   });
@@ -236,7 +355,8 @@ function renderPipeline(){
 
 function renderMilestones(){
   const el=document.getElementById('milestoneBody');
-  const sorted=[...companies].sort((a,b)=>{
+  const filtered=getFilteredCompanies();
+  const sorted=[...filtered].sort((a,b)=>{
     const da=a.plannedNext&&a.plannedNext.date?new Date(a.plannedNext.date):new Date('2099-12-31');
     const db2=b.plannedNext&&b.plannedNext.date?new Date(b.plannedNext.date):new Date('2099-12-31');
     return da-db2;
@@ -256,15 +376,18 @@ function renderMilestones(){
     let dots='<div class="progress-dots">';
     for(let i=0;i<5;i++){dots+=`<span class="${i<=curIdx?'active':''}"></span>`;}
     dots+='</div>';
-    html+=`<tr><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td><span class="stage-badge">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
+    const mName=getManagerName(c.managerId);
+    const mBadge=`<span class="manager-badge ${getManagerBadgeClass(c.managerId)}">${mName}</span>`;
+    html+=`<tr><td><strong>${c.name}</strong></td><td>${mBadge}</td><td><span class="stage-badge">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
   });
   el.innerHTML=html;
 }
 
 function renderCards(){
   const el=document.getElementById('companyCards');
+  const filtered=getFilteredCompanies();
   let html='';
-  companies.forEach(c=>{
+  filtered.forEach(c=>{
     const cur=getCurrentStage(c);
     const curIdx=getStageIndex(cur.stage);
     let bar='<div class="progress-bar">';
@@ -275,9 +398,17 @@ function renderCards(){
     }
     bar+='</div>';
     const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
+    const mName=getManagerName(c.managerId);
+    const mInfo=getManagerInfo(c.managerId);
+    const mRole=mInfo?mInfo.role:'';
     html+=`<div class="company-card" onclick="openDetail('${c.id}')">
-      <div class="c-name">${c.name}</div>
-      <div class="c-sector">${c.sector||''}</div>
+      <div class="c-header">
+        <div>
+          <div class="c-name">${c.name}</div>
+          <div class="c-sector">${c.sector||''}</div>
+        </div>
+        <span class="manager-badge ${getManagerBadgeClass(c.managerId)}">${mName}${mRole?' · '+mRole:''}</span>
+      </div>
       <div class="c-amount">${c.amount||0}억</div>
       <div class="c-date">진입: ${entryDate}</div>
       ${bar}
@@ -293,6 +424,7 @@ function openAddModal(){
   document.getElementById('fName').value='';
   document.getElementById('fSector').value='';
   document.getElementById('fAmount').value='';
+  document.getElementById('fManager').value='';
   document.getElementById('fStage').value='s1';
   document.getElementById('fDate').value=new Date().toISOString().slice(0,10);
   document.getElementById('fNextStage').value='';
@@ -309,6 +441,7 @@ function openEditModal(id){
   document.getElementById('fName').value=c.name||'';
   document.getElementById('fSector').value=c.sector||'';
   document.getElementById('fAmount').value=c.amount||'';
+  document.getElementById('fManager').value=c.managerId||'';
   document.getElementById('fStage').value=cur.stage||'s1';
   document.getElementById('fDate').value=cur.date||'';
   document.getElementById('fNextStage').value=c.plannedNext&&c.plannedNext.stage?c.plannedNext.stage:'';
@@ -326,6 +459,7 @@ async function saveDeal(){
   if(!name){alert('회사명을 입력하세요');return;}
   const sector=document.getElementById('fSector').value.trim();
   const amount=parseInt(document.getElementById('fAmount').value)||0;
+  const managerId=document.getElementById('fManager').value||null;
   const stage=document.getElementById('fStage').value;
   const date=document.getElementById('fDate').value;
   const nextStage=document.getElementById('fNextStage').value;
@@ -333,21 +467,18 @@ async function saveDeal(){
   const note=document.getElementById('fNote').value.trim();
 
   if(id){
-    // edit
     const old=companies.find(x=>x.id===id);
     let history=old&&old.history?[...old.history]:[];
     const oldStage=getCurrentStage(old);
     if(oldStage.stage!==stage||oldStage.date!==date){
-      // stage changed, check if last entry is same
       const last=history.length>0?history[history.length-1]:null;
       if(!last||last.stage!==stage||last.date!==date){
         history.push({stage,date});
       }
     }
-    await dealsRef.doc(id).update({name,sector,amount,history,plannedNext:{stage:nextStage||null,date:nextDate||null},note});
+    await dealsRef.doc(id).update({name,sector,amount,managerId,history,plannedNext:{stage:nextStage||null,date:nextDate||null},note});
   }else{
-    // add
-    await dealsRef.add({name,sector,amount,history:[{stage,date}],plannedNext:{stage:nextStage||null,date:nextDate||null},note});
+    await dealsRef.add({name,sector,amount,managerId,history:[{stage,date}],plannedNext:{stage:nextStage||null,date:nextDate||null},note});
   }
   closeModal();
 }
@@ -355,7 +486,9 @@ async function saveDeal(){
 function openDetail(id){
   const c=companies.find(x=>x.id===id);if(!c)return;
   const cur=getCurrentStage(c);
-  let html=`<p><strong>섹터:</strong> ${c.sector||'-'}</p>`;
+  const mInfo=getManagerInfo(c.managerId);
+  let html=`<p><strong>담당자:</strong> ${getManagerName(c.managerId)}${mInfo?' ('+mInfo.role+')':''}</p>`;
+  html+=`<p><strong>섹터:</strong> ${c.sector||'-'}</p>`;
   html+=`<p><strong>금액:</strong> ${c.amount||0}억</p>`;
   html+=`<p><strong>현재 단계:</strong> ${STAGES[cur.stage]||cur.stage} (${cur.date||''})</p>`;
   if(c.plannedNext){
@@ -364,7 +497,9 @@ function openDetail(id){
   if(c.note)html+=`<p><strong>비고:</strong> ${c.note}</p>`;
   html+=`<h3 style="margin-top:16px;font-size:0.95rem;">진행 이력</h3><ul class="history-list">`;
   if(c.history&&c.history.length>0){
-    c.history.forEach((h,i)=>{html+=`<li><span>${STAGES[h.stage]||h.stage}</span><span>${h.date||''}</span></li>`;});
+    // 날짜순 정렬해서 표시
+    const sorted=[...c.history].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    sorted.forEach((h,i)=>{html+=`<li><span>${STAGES[h.stage]||h.stage}</span><span>${h.date||''}</span></li>`;});
   }else{html+=`<li>이력 없음</li>`;}
   html+=`</ul>`;
   document.getElementById('detailTitle').textContent=c.name;
@@ -376,8 +511,62 @@ function openDetail(id){
 
 function closeDetailModal(){document.getElementById('detailModal').classList.remove('active');}
 
+// === Manager Modal ===
+function openManagerModal(){
+  renderManagerList();
+  document.getElementById('managerModal').classList.add('active');
+}
+function closeManagerModal(){document.getElementById('managerModal').classList.remove('active');}
+
+function renderManagerList(){
+  const el=document.getElementById('managerList');
+  if(managers.length===0){
+    el.innerHTML='<p style="font-size:0.85rem;color:#999;text-align:center;padding:16px;">등록된 담당자가 없습니다.</p>';
+    return;
+  }
+  let html='';
+  managers.forEach((m,i)=>{
+    const assignedCount=companies.filter(c=>c.managerId===m.id).length;
+    html+=`<div class="manager-item">
+      <div class="m-info">
+        <span class="manager-badge manager-badge-${i%4}">${m.name}</span>
+        <span class="m-role">${m.role||''} · ${assignedCount}개사 담당</span>
+      </div>
+      <button class="del-btn" onclick="deleteManager('${m.id}','${m.name}')">삭제</button>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+async function addManager(){
+  const name=document.getElementById('newManagerName').value.trim();
+  const role=document.getElementById('newManagerRole').value.trim();
+  if(!name){alert('이름을 입력하세요');return;}
+  await managersRef.add({name,role});
+  document.getElementById('newManagerName').value='';
+  document.getElementById('newManagerRole').value='';
+}
+
+async function deleteManager(id,name){
+  const assigned=companies.filter(c=>c.managerId===id);
+  if(assigned.length>0){
+    if(!confirm(`${name}님은 ${assigned.length}개사를 담당 중입니다. 삭제하면 해당 기업의 담당자가 '미지정'이 됩니다. 계속하시겠습니까?`))return;
+    // 해당 기업들의 managerId를 null로
+    for(const c of assigned){
+      await dealsRef.doc(c.id).update({managerId:null});
+    }
+  }else{
+    if(!confirm(`${name}님을 삭제하시겠습니까?`))return;
+  }
+  await managersRef.doc(id).delete();
+}
+
+// === Export / Import ===
 function exportJSON(){
-  const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;})};
+  const data={
+    managers:managers.map(m=>{const{id,...rest}=m;return{id:m.id,...rest};}),
+    companies:companies.map(c=>{const{id,...rest}=c;return{id:c.id,...rest};})
+  };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';
@@ -390,15 +579,40 @@ async function importJSON(e){
   try{
     const data=JSON.parse(text);
     if(!data.companies||!Array.isArray(data.companies)){alert('올바른 JSON 형식이 아닙니다.');return;}
-    if(!confirm(`${data.companies.length}개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다. 계속하시겠습니까?`))return;
-    // delete all existing
-    const batch1=db.batch();
-    const existing=await dealsRef.get();
-    existing.forEach(doc=>batch1.delete(doc.ref));
-    await batch1.commit();
-    // add new
+    const hasManagers=data.managers&&Array.isArray(data.managers);
+    const msg=hasManagers
+      ?`담당자 ${data.managers.length}명, 기업 ${data.companies.length}개사 데이터를 가져옵니다.\n기존 데이터는 삭제됩니다. 계속하시겠습니까?`
+      :`${data.companies.length}개 기업 데이터를 가져옵니다.\n기존 데이터는 삭제됩니다. 계속하시겠습니까?`;
+    if(!confirm(msg))return;
+
+    // delete existing deals
+    const existingDeals=await dealsRef.get();
+    for(const doc of existingDeals.docs){await doc.ref.delete();}
+
+    // import managers if present
+    let managerIdMap={};
+    if(hasManagers){
+      // delete existing managers
+      const existingManagers=await managersRef.get();
+      for(const doc of existingManagers.docs){await doc.ref.delete();}
+      // add new managers
+      for(const m of data.managers){
+        const oldId=m.id;
+        const{id,...rest}=m;
+        const newDoc=await managersRef.add(rest);
+        managerIdMap[oldId]=newDoc.id;
+      }
+    }
+
+    // add companies
     for(const c of data.companies){
       const{id,...rest}=c;
+      // remap managerId if managers were imported
+      if(hasManagers&&rest.managerId&&managerIdMap[rest.managerId]){
+        rest.managerId=managerIdMap[rest.managerId];
+      } else if(hasManagers&&rest.managerId){
+        rest.managerId=null; // manager not found in import
+      }
       await dealsRef.add(rest);
     }
     alert('가져오기 완료!');
