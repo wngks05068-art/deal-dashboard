@@ -29,7 +29,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .section-title{font-size:1rem;font-weight:700;}
 .section-hint{font-size:0.75rem;color:#bbb;}
-/* Kanban */
 .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px;min-height:200px;}
 .kanban-col{background:#fff;border-radius:14px;border:1px solid #eee;padding:14px 10px;display:flex;flex-direction:column;}
 .kanban-col-header{text-align:center;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:10px;}
@@ -48,7 +47,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .seg-current{background:#3b82f6;}
 .seg-future{background:#e0e0e0;}
 .kanban-card .kc-mgr .mgr-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:600;}
-/* Milestone table */
 .milestone-table{width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;}
 .milestone-table thead{background:#fafafa;}
 .milestone-table th{padding:12px 10px;font-size:0.75rem;color:#999;font-weight:500;text-align:left;border-bottom:1px solid #eee;}
@@ -69,7 +67,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .progress-dots span{width:8px;height:8px;border-radius:50%;background:#e0e0e0;}
 .progress-dots span.active{background:#4ade80;}
 .footer-note{text-align:center;font-size:0.75rem;color:#bbb;padding:20px 0;}
-/* Modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1000;justify-content:center;align-items:center;}
 .modal-overlay.active{display:flex;}
 .modal{background:#fff;border-radius:16px;padding:28px;width:90vw;max-width:90vw;max-height:88vh;overflow-y:auto;}
@@ -104,10 +101,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .form-group input:focus,.form-group select:focus{border-color:#1a1a1a;}
 .form-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+/* Manager modal */
+.mgr-list{list-style:none;margin-bottom:16px;}
+.mgr-list li{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;}
+.mgr-list li:last-child{border-bottom:none;}
+.mgr-list .mgr-badge-lg{display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.82rem;font-weight:600;}
+.mgr-list .mgr-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem;padding:4px 8px;}
+.mgr-list .mgr-del:hover{color:#d32f2f;}
+.mgr-add-row{display:flex;gap:8px;align-items:center;}
+.mgr-add-row input,.mgr-add-row select{padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;}
+.mgr-add-row input{flex:1;}
+.mgr-empty{text-align:center;color:#999;font-size:0.85rem;padding:16px 0;}
+.color-opt{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px;}
 @media(max-width:768px){
 .summary-grid{grid-template-columns:1fr 1fr;}
 .kanban{grid-template-columns:1fr;gap:8px;}
-.kanban-col{min-height:auto;}
 .form-row{grid-template-columns:1fr;}
 .top-bar{flex-direction:column;}
 }
@@ -122,29 +130,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
     </div>
     <div class="top-right">
+      <button class="btn" onclick="openMgrModal()">담당자 관리</button>
       <button class="btn" onclick="exportJSON()">내보내기</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
       <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
     </div>
   </div>
-
   <div class="summary-grid">
     <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div></div>
     <div class="summary-card"><div class="label">가장 임박한 일정</div><div class="value" id="sumNearest">-</div><div class="sub" id="sumNearestSub"></div></div>
     <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
   </div>
-
   <div class="section-header"><div class="section-title">파이프라인 (5단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
   <div class="kanban" id="kanbanBoard"></div>
-
   <div class="section-header"><div class="section-title">다음 마일스톤 (임박순)</div></div>
   <table class="milestone-table">
     <thead><tr><th>기업명</th><th>섹터</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
     <tbody id="milestoneBody"></tbody>
   </table>
-
   <div class="footer-note">데이터는 Firebase에 실시간 저장됩니다. 모든 기기에서 동일한 데이터가 표시됩니다.</div>
 </div>
 
@@ -155,7 +160,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   <div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div>
   <div class="form-row">
     <div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div>
-    <div class="form-group"><label>담당자</label><input id="aManager" placeholder="홍길동"></div>
+    <div class="form-group"><label>담당자</label><select id="aManager"></select></div>
   </div>
   <div class="form-row">
     <div class="form-group"><label>투자금액 (억)</label><input id="aAmount" type="number" placeholder="30"></div>
@@ -179,6 +184,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 <div class="modal" style="max-width:620px;" id="detailModalContent"></div>
 </div>
 
+<!-- Manager Modal -->
+<div class="modal-overlay" id="mgrModal">
+<div class="modal" style="max-width:440px;">
+  <h2>담당자 관리</h2>
+  <div id="mgrListArea"></div>
+  <div class="mgr-add-row">
+    <input id="mgrNewName" placeholder="이름">
+    <select id="mgrNewColor">
+      <option value="#2e7d32" style="color:#2e7d32;">● 초록</option>
+      <option value="#1565c0" style="color:#1565c0;">● 파랑</option>
+      <option value="#e65100" style="color:#e65100;">● 주황</option>
+      <option value="#7b1fa2" style="color:#7b1fa2;">● 보라</option>
+      <option value="#c62828" style="color:#c62828;">● 빨강</option>
+      <option value="#00695c" style="color:#00695c;">● 청록</option>
+    </select>
+    <button class="btn btn-sm btn-primary" onclick="addManager()">등록</button>
+  </div>
+  <div class="form-actions" style="margin-top:20px;"><button class="btn" onclick="closeMgrModal()">닫기</button></div>
+</div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -192,19 +218,24 @@ firebase.initializeApp({
 });
 const db=firebase.firestore();
 const dealsRef=db.collection('deals');
+const mgrsRef=db.collection('managers');
 
 const STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약',s5:'투자금 납입'};
 const STAGE_KEYS=['s1','s2','s3','s4','s5'];
-const MGR_COLORS=['#e8f5e9:#2e7d32','#e3f2fd:#1565c0','#fff3e0:#e65100','#f3e5f5:#7b1fa2','#fce4ec:#c62828','#e0f2f1:#00695c'];
+const COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
 let companies=[];
+let managers=[];
 
 document.getElementById('todayDate').textContent='오늘: '+new Date().toISOString().slice(0,10);
 document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
 
+// Real-time listeners
 dealsRef.orderBy('name').onSnapshot(snap=>{
-  companies=[];
-  snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));
-  renderAll();
+  companies=[];snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));renderAll();
+});
+mgrsRef.orderBy('name').onSnapshot(snap=>{
+  managers=[];snap.forEach(doc=>managers.push({id:doc.id,...doc.data()}));
+  renderMgrList();refreshMgrSelects();renderAll();
 });
 
 function renderAll(){renderSummary();renderKanban();renderMilestones();}
@@ -220,11 +251,36 @@ function getDday(dateStr){
   const target=new Date(dateStr);target.setHours(0,0,0,0);
   return Math.ceil((target-today)/(1000*60*60*24));
 }
-function getMgrColor(name){
-  if(!name)return{bg:'#f5f5f5',fg:'#999'};
-  let hash=0;for(let i=0;i<name.length;i++)hash=name.charCodeAt(i)+((hash<<5)-hash);
-  const c=MGR_COLORS[Math.abs(hash)%MGR_COLORS.length].split(':');
-  return{bg:c[0],fg:c[1]};
+function getMgrInfo(name){
+  const m=managers.find(x=>x.name===name);
+  if(m)return{bg:COLOR_BG[m.color]||'#f5f5f5',fg:m.color||'#999'};
+  return{bg:'#f5f5f5',fg:'#999'};
+}
+function mgrBadgeHtml(name,size){
+  if(!name)return'';
+  const m=getMgrInfo(name);
+  const fs=size==='sm'?'0.68rem':'0.78rem';
+  const pd=size==='sm'?'2px 8px':'3px 10px';
+  return`<span style="background:${m.bg};color:${m.fg};padding:${pd};border-radius:10px;font-size:${fs};font-weight:600;">${name}</span>`;
+}
+
+// Manager selects
+function refreshMgrSelects(){
+  const selects=document.querySelectorAll('.mgr-select');
+  selects.forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML='<option value="">(담당자 미지정)</option>';
+    managers.forEach(m=>{sel.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});
+    sel.value=cur;
+  });
+  // Also update the add modal select
+  const addSel=document.getElementById('aManager');
+  if(addSel){
+    const cur=addSel.value;
+    addSel.innerHTML='<option value="">(담당자 미지정)</option>';
+    managers.forEach(m=>{addSel.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});
+    addSel.value=cur;
+  }
 }
 
 function renderSummary(){
@@ -251,40 +307,22 @@ function renderSummary(){
 
 function renderKanban(){
   const el=document.getElementById('kanbanBoard');
-  const grouped={};
-  STAGE_KEYS.forEach(sk=>grouped[sk]=[]);
+  const grouped={};STAGE_KEYS.forEach(sk=>grouped[sk]=[]);
   companies.forEach(c=>{const s=getCurrentStage(c).stage;if(grouped[s])grouped[s].push(c);});
   let html='';
   STAGE_KEYS.forEach(sk=>{
-    const list=grouped[sk];
-    const amt=list.reduce((s,c)=>s+(c.amount||0),0);
-    html+=`<div class="kanban-col">
-      <div class="kanban-col-header">
-        <div class="col-title">${STAGES[sk]}</div>
-        <div class="col-stat">${list.length}개사 · ${amt}억</div>
-      </div>
-      <div class="kanban-cards">`;
+    const list=grouped[sk];const amt=list.reduce((s,c)=>s+(c.amount||0),0);
+    html+=`<div class="kanban-col"><div class="kanban-col-header"><div class="col-title">${STAGES[sk]}</div><div class="col-stat">${list.length}개사 · ${amt}억</div></div><div class="kanban-cards">`;
     list.forEach(c=>{
-      const cur=getCurrentStage(c);
-      const curIdx=getStageIndex(cur.stage);
+      const cur=getCurrentStage(c);const curIdx=getStageIndex(cur.stage);
       const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
-      const mc=getMgrColor(c.manager);
       let bar='<div class="kc-bar">';
-      for(let i=0;i<5;i++){
-        if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;
-        else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;
-        else bar+=`<div class="seg seg-future"></div>`;
-      }
+      for(let i=0;i<5;i++){if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;else bar+=`<div class="seg seg-future"></div>`;}
       bar+='</div>';
-      const mgrHtml=c.manager?`<span class="mgr-badge" style="background:${mc.bg};color:${mc.fg};">${c.manager}</span>`:'';
       html+=`<div class="kanban-card" onclick="openDetail('${c.id}')">
-        <div class="kc-name">${c.name}</div>
-        <div class="kc-sector">${c.sector||''}</div>
-        <div class="kc-amount">${c.amount||0}억</div>
-        <div class="kc-date">진입: ${entryDate}</div>
-        ${bar}
-        <div class="kc-mgr">${mgrHtml}</div>
-      </div>`;
+        <div class="kc-name">${c.name}</div><div class="kc-sector">${c.sector||''}</div>
+        <div class="kc-amount">${c.amount||0}억</div><div class="kc-date">진입: ${entryDate}</div>
+        ${bar}<div class="kc-mgr">${mgrBadgeHtml(c.manager,'sm')}</div></div>`;
     });
     html+=`</div></div>`;
   });
@@ -300,46 +338,40 @@ function renderMilestones(){
   });
   let html='';
   sorted.forEach(c=>{
-    const cur=getCurrentStage(c);
-    const curIdx=getStageIndex(cur.stage);
+    const cur=getCurrentStage(c);const curIdx=getStageIndex(cur.stage);
     const nextLabel=c.plannedNext&&c.plannedNext.stage?STAGES[c.plannedNext.stage]:'미정';
     const nextDate=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
     const dday=c.plannedNext&&c.plannedNext.date?getDday(c.plannedNext.date):null;
     let ddayHtml='';
-    if(dday===null){ddayHtml='<span class="dday-badge dday-none">미정</span>';}
-    else if(dday<0){ddayHtml=`<span class="dday-badge dday-urgent">D+${Math.abs(dday)}</span>`;}
-    else if(dday<=7){ddayHtml=`<span class="dday-badge dday-urgent">D-${dday}</span>`;}
-    else{ddayHtml=`<span class="dday-badge dday-normal">D-${dday}</span>`;}
+    if(dday===null)ddayHtml='<span class="dday-badge dday-none">미정</span>';
+    else if(dday<0)ddayHtml=`<span class="dday-badge dday-urgent">D+${Math.abs(dday)}</span>`;
+    else if(dday<=7)ddayHtml=`<span class="dday-badge dday-urgent">D-${dday}</span>`;
+    else ddayHtml=`<span class="dday-badge dday-normal">D-${dday}</span>`;
     let dots='<div class="progress-dots">';
-    for(let i=0;i<5;i++){dots+=`<span class="${i<=curIdx?'active':''}"></span>`;}
+    for(let i=0;i<5;i++)dots+=`<span class="${i<=curIdx?'active':''}"></span>`;
     dots+='</div>';
-    const mc=getMgrColor(c.manager);
-    const mgrHtml=c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;">${c.manager}</span>`:'<span style="color:#ccc;">-</span>';
-    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${mgrHtml}</td><td><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
+    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${c.manager?mgrBadgeHtml(c.manager,'sm'):'<span style="color:#ccc;">-</span>'}</td><td><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
   });
   el.innerHTML=html;
 }
 
 // === Add Modal ===
 function openAddModal(){
-  document.getElementById('aName').value='';
-  document.getElementById('aSector').value='';
-  document.getElementById('aManager').value='';
-  document.getElementById('aAmount').value='';
+  document.getElementById('aName').value='';document.getElementById('aSector').value='';
+  document.getElementById('aManager').value='';document.getElementById('aAmount').value='';
   document.getElementById('aStage').value='s1';
   document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
   document.getElementById('aNote').value='';
+  refreshMgrSelects();
   document.getElementById('addModal').classList.add('active');
 }
 function closeAddModal(){document.getElementById('addModal').classList.remove('active');}
-
 async function saveNewDeal(){
   const name=document.getElementById('aName').value.trim();
   if(!name){alert('회사명을 입력하세요');return;}
   await dealsRef.add({
-    name,
-    sector:document.getElementById('aSector').value.trim(),
-    manager:document.getElementById('aManager').value.trim(),
+    name,sector:document.getElementById('aSector').value.trim(),
+    manager:document.getElementById('aManager').value,
     amount:parseInt(document.getElementById('aAmount').value)||0,
     history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],
     plannedNext:{stage:null,date:null},
@@ -352,19 +384,22 @@ async function saveNewDeal(){
 function openDetail(id){
   const c=companies.find(x=>x.id===id);if(!c)return;
   const cur=getCurrentStage(c);
-  const mc=getMgrColor(c.manager);
   let html=`<h2>${c.name}</h2>
-    <div class="detail-meta">
-      <div class="dm-item"><span class="dm-label">섹터</span><span class="dm-value">${c.sector||'-'}</span></div>
-      <div class="dm-item"><span class="dm-label">금액</span><span class="dm-value">${c.amount||0}억</span></div>
-      <div class="dm-item"><span class="dm-label">현재 단계</span><span class="dm-value"><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]}</span></span></div>
-      <div class="dm-item"><span class="dm-label">담당자</span><span class="dm-value">${c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.78rem;font-weight:600;">${c.manager}</span>`:'미지정'}</span></div>
-    </div>`;
+  <div class="form-row" style="margin-bottom:16px;">
+    <div class="form-group"><label>기업명</label><input id="dName" value="${c.name||''}"></div>
+    <div class="form-group"><label>섹터</label><input id="dSector" value="${c.sector||''}"></div>
+  </div>
+  <div class="form-row" style="margin-bottom:16px;">
+    <div class="form-group"><label>담당자</label><select id="dManager" class="mgr-select"><option value="">(담당자 미지정)</option>${managers.map(m=>`<option value="${m.name}" ${c.manager===m.name?'selected':''}>${m.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>투자금액(억)</label><input id="dAmount" type="number" value="${c.amount||0}"></div>
+  </div>
+  <div class="form-group" style="margin-bottom:16px;"><label>비고</label><input id="dNote" value="${c.note||''}"></div>`;
+
   // History
   html+=`<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">`;
   if(c.history&&c.history.length>0){
     c.history.forEach((h,i)=>{
-      html+=`<div class="history-item"><span class="h-date">${h.date||''}</span><span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span><button class="h-del" onclick="event.stopPropagation();deleteHistory('${c.id}',${i})" title="삭제">✕</button></div>`;
+      html+=`<div class="history-item"><span class="h-date">${h.date||''}</span><span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span><span style="font-size:0.72rem;color:#bbb;">${h.date?h.date:''}</span><button class="h-del" onclick="event.stopPropagation();deleteHistory('${c.id}',${i})">✕</button></div>`;
     });
   }
   html+=`</div><div class="add-history-row">
@@ -372,16 +407,17 @@ function openDetail(id){
     <input type="date" id="newHistDate" value="${new Date().toISOString().slice(0,10)}">
     <button class="btn btn-sm btn-primary" onclick="addHistory('${c.id}')">+ 단계 기록</button>
   </div></div>`;
+
   // Next stage
   html+=`<div class="detail-section"><h3>다음 예상 단계</h3>
     <div class="next-stage-row">
       <div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}</select></div>
       <div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="${c.plannedNext&&c.plannedNext.date?c.plannedNext.date:''}"></div>
     </div><div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div></div>`;
-  // Note
-  html+=`<div class="detail-section"><h3>비고</h3><textarea id="detailNote" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;resize:vertical;">${c.note||''}</textarea></div>`;
+
   // Actions
-  html+=`<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">닫기</button><button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button></div></div>`;
+  html+=`<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button></div></div>`;
+
   document.getElementById('detailModalContent').innerHTML=html;
   document.getElementById('detailModal').classList.add('active');
 }
@@ -403,8 +439,12 @@ async function deleteHistory(id,index){
 }
 async function saveDetail(id){
   await dealsRef.doc(id).update({
-    plannedNext:{stage:document.getElementById('nextStageSelect').value||null,date:document.getElementById('nextStageDate').value||null},
-    note:document.getElementById('detailNote').value.trim()
+    name:document.getElementById('dName').value.trim(),
+    sector:document.getElementById('dSector').value.trim(),
+    manager:document.getElementById('dManager').value,
+    amount:parseInt(document.getElementById('dAmount').value)||0,
+    note:document.getElementById('dNote').value.trim(),
+    plannedNext:{stage:document.getElementById('nextStageSelect').value||null,date:document.getElementById('nextStageDate').value||null}
   });
   closeDetailModal();
 }
@@ -413,9 +453,36 @@ async function deleteDeal(id){
   if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){await dealsRef.doc(id).delete();closeDetailModal();}
 }
 
+// === Manager Modal ===
+function openMgrModal(){document.getElementById('mgrModal').classList.add('active');renderMgrList();}
+function closeMgrModal(){document.getElementById('mgrModal').classList.remove('active');}
+function renderMgrList(){
+  const el=document.getElementById('mgrListArea');
+  if(managers.length===0){el.innerHTML='<div class="mgr-empty">등록된 담당자가 없습니다.<br>아래에서 담당자를 추가하세요.</div>';return;}
+  let html='<ul class="mgr-list">';
+  managers.forEach(m=>{
+    const bg=COLOR_BG[m.color]||'#f5f5f5';
+    html+=`<li><span class="mgr-badge-lg" style="background:${bg};color:${m.color};">${m.name}</span><button class="mgr-del" onclick="deleteManager('${m.id}')">✕</button></li>`;
+  });
+  html+='</ul>';
+  el.innerHTML=html;
+}
+async function addManager(){
+  const name=document.getElementById('mgrNewName').value.trim();
+  if(!name){alert('이름을 입력하세요');return;}
+  if(managers.find(m=>m.name===name)){alert('이미 등록된 담당자입니다.');return;}
+  const color=document.getElementById('mgrNewColor').value;
+  await mgrsRef.add({name,color});
+  document.getElementById('mgrNewName').value='';
+}
+async function deleteManager(id){
+  const m=managers.find(x=>x.id===id);
+  if(m&&confirm(m.name+' 담당자를 삭제하시겠습니까?')){await mgrsRef.doc(id).delete();}
+}
+
 // === Export / Import ===
 function exportJSON(){
-  const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;})};
+  const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;}),managers:managers.map(m=>{const{id,...rest}=m;return rest;})};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -427,9 +494,12 @@ async function importJSON(e){
     const data=JSON.parse(text);
     if(!data.companies||!Array.isArray(data.companies)){alert('올바른 JSON 형식이 아닙니다.');return;}
     if(!confirm(data.companies.length+'개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다. 계속하시겠습니까?'))return;
-    const existing=await dealsRef.get();
-    const batch=db.batch();existing.forEach(doc=>batch.delete(doc.ref));await batch.commit();
+    const ex1=await dealsRef.get();const b1=db.batch();ex1.forEach(doc=>b1.delete(doc.ref));await b1.commit();
     for(const c of data.companies){const{id,...rest}=c;await dealsRef.add(rest);}
+    if(data.managers&&Array.isArray(data.managers)){
+      const ex2=await mgrsRef.get();const b2=db.batch();ex2.forEach(doc=>b2.delete(doc.ref));await b2.commit();
+      for(const m of data.managers){const{id,...rest}=m;await mgrsRef.add(rest);}
+    }
     alert('가져오기 완료!');
   }catch(err){alert('JSON 파싱 오류: '+err.message);}
   e.target.value='';
