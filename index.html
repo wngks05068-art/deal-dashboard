@@ -248,6 +248,20 @@ function renderSummary(){
   const dc=companies.filter(c=>getCur(c).stage==='s5');
   document.getElementById('sumDone').textContent=dc.reduce((s,c)=>s+getTotalAmt(c),0)+'억';
   document.getElementById('sumDoneSub').textContent=dc.length+'개사';
+  const mbEl=document.getElementById('mgrBreakdown');
+if(managers.length>0){
+  let mh='';
+  managers.forEach(m=>{
+    const mComps=companies.filter(c=>getMgrNames(c).includes(m.name));
+    const mAmt=mComps.reduce((s,c)=>s+getTotalAmt(c),0);
+    mh+=`<div class="fund-row"><span class="fund-name"><span class="badge-inline" style="background:${bg(m.color)};color:${m.color};font-size:0.65rem;padding:1px 6px;">${m.name}</span></span><span class="fund-amt">${mComps.length}건 · ${mAmt}억</span></div>`;
+  });
+  const noMgr=companies.filter(c=>getMgrNames(c).length===0);
+  if(noMgr.length>0){const nAmt=noMgr.reduce((s,c)=>s+getTotalAmt(c),0);mh+=`<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">${noMgr.length}건 · ${nAmt}억</span></div>`;}
+  mbEl.innerHTML=mh;
+}else mbEl.innerHTML='';
+
+  
 }
 
 function renderKanban(){
@@ -262,7 +276,7 @@ function renderKanban(){
       const cur=getCur(c),ci=sIdx(cur.stage),ed=cur.date?(cur.date.slice(5).replace('-','/')):'',ta=getTotalAmt(c);
       let bar='<div class="kc-bar">';for(let i=0;i<5;i++){if(i<ci)bar+='<div class="seg seg-done"></div>';else if(i===ci)bar+='<div class="seg seg-current"></div>';else bar+='<div class="seg seg-future"></div>';}bar+='</div>';
       let fdHtml='';if(c.fundAllocs&&c.fundAllocs.length>0){fdHtml='<div class="kc-fund-detail">'+c.fundAllocs.map(a=>{const fi=fundInfo(a.fund);return`${fi.short} ${a.amount}억`;}).join(' / ')+'</div>';}
-      let btm='<div class="kc-bottom">';getFundNames(c).forEach(fn=>{const fi=fundInfo(fn);btm+=badgeS(fi.short,fi);});getMgrNames(c).forEach(mn=>btm+=badgeS(mn,mgrInfo(mn)));btm+='</div>';
+      let btm='';const fns=getFundNames(c),mns=getMgrNames(c);if(fns.length){btm+='<div class="kc-bottom">';fns.forEach(fn=>{const fi=fundInfo(fn);btm+=badgeS(fi.short,fi);});btm+='</div>';}if(mns.length){btm+='<div class="kc-bottom" style="margin-top:4px;">';mns.forEach(mn=>btm+=badgeS(mn,mgrInfo(mn)));btm+='</div>';}
       h+=`<div class="kanban-card" onclick="openDetail('${c.id}')"><div class="kc-name">${c.name}</div><div class="kc-sector">${c.sector||''}</div><div class="kc-amount">${ta}억</div>${fdHtml}<div class="kc-date">진입: ${ed}</div>${bar}${btm}</div>`;
     });
     h+=`</div></div>`;
@@ -495,14 +509,12 @@ async function importJSON(e){
       <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
     </div>
   </div>
-  <div class="summary-grid">
+  <div class="summary-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
     <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
-    <div class="summary-card">
-      <div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div>
-      <div class="fund-breakdown" id="fundBreakdown"></div>
-    </div>
+    <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div><div class="fund-breakdown" id="fundBreakdown"></div></div>
     <div class="summary-card"><div class="label">가장 임박한 일정</div><div class="value" id="sumNearest">-</div><div class="sub" id="sumNearestSub"></div></div>
     <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
+    <div class="summary-card"><div class="label">담당자별 현황</div><div class="fund-breakdown" id="mgrBreakdown" style="margin-top:4px;border-top:none;padding-top:0;"></div></div>
   </div>
   <div class="section-header"><div class="section-title">파이프라인 (5단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
   <div class="kanban" id="kanbanBoard"></div>
