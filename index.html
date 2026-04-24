@@ -5,295 +5,174 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>투자 파이프라인 현황판</title>
 <style>
-  * { box-sizing: border-box; }
-  :root {
-    --bg: #ffffff;
-    --bg-secondary: #f5f4ee;
-    --bg-tertiary: #faf9f5;
-    --text-primary: #1a1915;
-    --text-secondary: #5f5e5a;
-    --text-tertiary: #888780;
-    --border: rgba(26, 25, 21, 0.12);
-    --border-strong: rgba(26, 25, 21, 0.25);
-    --accent: #c15f3c;
-    --accent-bg: #faece7;
-    --danger: #a32d2d;
-    --danger-bg: #fcebeb;
-    --warning: #854f0b;
-    --warning-bg: #faeeda;
-    --success: #0f6e56;
-    --success-bg: #e1f5ee;
-    --info: #185fa5;
-    --info-bg: #e6f1fb;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    margin: 0;
-    padding: 24px;
-    line-height: 1.5;
-  }
-  .container { max-width: 1280px; margin: 0 auto; }
-  h1 { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
-  .subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .toolbar-left { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--text-tertiary); }
-  .toolbar-right { display: flex; gap: 8px; }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #639922; display: inline-block; }
-  .btn {
-    font-size: 13px; padding: 8px 14px; border-radius: var(--radius-md);
-    border: 0.5px solid var(--border-strong); background: var(--bg); cursor: pointer;
-    color: var(--text-primary); font-family: inherit; transition: background 0.15s;
-  }
-  .btn:hover { background: var(--bg-secondary); }
-  .btn-primary { background: var(--text-primary); color: white; border-color: var(--text-primary); }
-  .btn-primary:hover { background: #333; }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-  .kpi { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 14px 16px; }
-  .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
-  .kpi-value { font-size: 22px; font-weight: 500; }
-  .kpi-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-  .section-title {
-    font-size: 15px; font-weight: 500; margin: 24px 0 12px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .section-title .muted { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
-  .pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
-  .stage-col {
-    background: var(--bg-secondary); border-radius: var(--radius-md);
-    padding: 10px 8px; min-height: 220px;
-  }
-  .stage-head {
-    font-size: 12px; font-weight: 500; text-align: center; padding-bottom: 8px;
-    border-bottom: 0.5px solid var(--border); margin-bottom: 8px;
-  }
-  .stage-count { font-size: 11px; color: var(--text-tertiary); font-weight: 400; margin-top: 2px; }
-  .card {
-    background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md);
-    padding: 10px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s;
-  }
-  .card:hover { border-color: var(--border-strong); }
-  .card-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .card-sector { font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; }
-  .card-amount { font-size: 13px; font-weight: 500; }
-  .card-entered { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
-  .card-manager { font-size: 11px; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
-  .progress-bar { display: flex; gap: 2px; margin-top: 6px; }
-  .progress-seg { height: 3px; flex: 1; border-radius: 1px; background: var(--border); }
-  .progress-seg.done { background: #1D9E75; }
-  .progress-seg.current { background: #378ADD; }
-  .empty-col { font-size: 11px; color: var(--text-tertiary); text-align: center; padding: 20px 10px; font-style: italic; }
-  .table-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    text-align: left; font-weight: 500; color: var(--text-secondary);
-    font-size: 12px; padding: 8px 10px; border-bottom: 0.5px solid var(--border);
-    background: var(--bg-secondary);
-  }
-  td { padding: 10px; border-bottom: 0.5px solid var(--border); font-size: 13px; vertical-align: middle; }
-  .stage-badge {
-    display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 500;
-  }
-  .s1 { background: #F1EFE8; color: #444441; }
-  .s2 { background: #EEEDFE; color: #3C3489; }
-  .s3 { background: #E6F1FB; color: #0C447C; }
-  .s4 { background: #FAEEDA; color: #633806; }
-  .s5 { background: #E1F5EE; color: #085041; }
-  .dday {
-    display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px;
-    font-weight: 500;
-  }
-  .dday-urgent { background: var(--danger-bg); color: var(--danger); }
-  .dday-soon { background: var(--warning-bg); color: var(--warning); }
-  .dday-ok { background: var(--success-bg); color: var(--success); }
-  .dday-past { background: var(--bg-secondary); color: var(--text-secondary); }
-  .dday-tbd { background: var(--bg-secondary); color: var(--text-tertiary); }
-  .avatar {
-    width: 22px; height: 22px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 500; flex-shrink: 0;
-    letter-spacing: -0.3px;
-  }
-  .manager-cell { display: inline-flex; align-items: center; gap: 6px; }
-  .manager-name { font-size: 12px; color: var(--text-primary); }
-  .manager-empty { font-size: 11px; color: var(--text-tertiary); font-style: italic; }
-  .sector-badge {
-    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px;
-    background: var(--bg-secondary); color: var(--text-secondary);
-  }
-  /* Modal */
-  .modal-bg {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100;
-    display: flex; align-items: flex-start; justify-content: center; padding-top: 60px;
-    overflow-y: auto;
-  }
-  .modal {
-    background: var(--bg); border-radius: var(--radius-lg); padding: 20px;
-    width: 92%; max-width: 520px; max-height: 85vh; overflow-y: auto;
-    margin-bottom: 60px;
-  }
-  .modal-title { font-size: 16px; font-weight: 500; margin: 0 0 16px; }
-  .modal-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-  .modal-row label { font-size: 12px; color: var(--text-secondary); width: 90px; flex-shrink: 0; }
-  .modal-row input, .modal-row select, .modal-row textarea {
-    flex: 1; padding: 6px 10px; border-radius: var(--radius-md);
-    border: 0.5px solid var(--border-strong); font-family: inherit; font-size: 13px;
-    background: var(--bg); color: var(--text-primary);
-  }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 0.5px solid var(--border); }
-  .history-block { margin-top: 16px; padding-top: 12px; border-top: 0.5px solid var(--border); }
-  .history-title { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
-  .history-item {
-    display: grid; grid-template-columns: 100px 1fr auto; gap: 8px;
-    padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 13px;
-    align-items: center;
-  }
-  .history-item:last-child { border-bottom: none; }
-  .history-date { color: var(--text-secondary); font-size: 12px; }
-  .history-current { font-weight: 500; }
-  .icon-btn {
-    background: transparent; border: none; cursor: pointer;
-    color: var(--text-tertiary); font-size: 14px; padding: 2px 6px;
-  }
-  .icon-btn:hover { color: var(--text-primary); }
-  .icon-btn.danger:hover { color: var(--danger); }
-  .add-history-row {
-    display: flex; gap: 8px; margin-top: 10px; align-items: center;
-    padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-md);
-  }
-  .add-history-row select, .add-history-row input {
-    padding: 5px 8px; font-size: 12px; border-radius: 6px;
-    border: 0.5px solid var(--border-strong); font-family: inherit;
-    background: var(--bg); color: var(--text-primary);
-  }
-  .danger-zone { margin-top: 16px; padding: 10px; background: var(--danger-bg); border-radius: var(--radius-md); }
-  .danger-zone .btn { color: var(--danger); border-color: var(--danger); background: var(--bg); }
-  .manager-list {
-    display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;
-    max-height: 300px; overflow-y: auto;
-  }
-  .manager-list-item {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-    background: var(--bg-secondary); border-radius: var(--radius-md);
-  }
-  .manager-list-info { flex: 1; min-width: 0; }
-  .manager-list-name { font-size: 13px; font-weight: 500; }
-  .manager-list-meta { font-size: 11px; color: var(--text-secondary); }
-  .add-manager-form {
-    display: flex; gap: 6px; padding: 10px; background: var(--bg-secondary);
-    border-radius: var(--radius-md); margin-top: 10px;
-  }
-  .add-manager-form input { flex: 1; padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 0.5px solid var(--border-strong); background: var(--bg); font-family: inherit; color: var(--text-primary); }
-  .footer-note { text-align: center; font-size: 11px; color: var(--text-tertiary); padding: 24px 0 8px; }
-  .hidden { display: none !important; }
-  @media (max-width: 900px) {
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    .pipeline { grid-template-columns: 1fr; }
-    .stage-col { min-height: auto; }
-  }
-  @media (max-width: 600px) {
-    body { padding: 12px; }
-    .toolbar { flex-direction: column; align-items: stretch; }
-    .toolbar-right { justify-content: flex-end; flex-wrap: wrap; }
-    table { font-size: 12px; }
-    th, td { padding: 6px 8px; }
-  }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f5f5f0;color:#1a1a1a;line-height:1.6;}
+.container{max-width:720px;margin:0 auto;padding:20px 16px 40px;}
+h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
+.subtitle{font-size:0.85rem;color:#888;margin-bottom:16px;}
+.meta-row{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:#999;margin-bottom:18px;}
+.meta-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;}
+.btn-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.btn{padding:8px 16px;border-radius:20px;border:1.5px solid #ddd;background:#fff;font-size:0.85rem;cursor:pointer;font-weight:500;transition:all .2s;}
+.btn:hover{background:#f0f0f0;}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+.btn-primary:hover{background:#333;}
+.btn-danger{color:#d32f2f;border-color:#d32f2f;background:#fff;}
+.btn-danger:hover{background:#fef0f0;}
+.btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:14px;}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+.summary-card{background:#fff;border-radius:14px;padding:18px 16px;border:1px solid #eee;}
+.summary-card .label{font-size:0.75rem;color:#999;margin-bottom:4px;}
+.summary-card .value{font-size:1.8rem;font-weight:700;}
+.summary-card .sub{font-size:0.75rem;color:#aaa;margin-top:2px;}
+.section-title{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.section-title .hint{font-size:0.75rem;color:#bbb;font-weight:400;}
+.pipeline-stage{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid #eee;text-align:center;}
+.pipeline-stage .stage-name{font-size:0.95rem;font-weight:600;margin-bottom:4px;}
+.pipeline-stage .stage-stat{font-size:0.8rem;color:#999;}
+.pipeline-stages{margin-bottom:28px;}
+.milestone-table{width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;}
+.milestone-table thead{background:#fafafa;}
+.milestone-table th{padding:12px 10px;font-size:0.75rem;color:#999;font-weight:500;text-align:left;border-bottom:1px solid #eee;}
+.milestone-table td{padding:12px 10px;font-size:0.85rem;border-bottom:1px solid #f5f5f5;vertical-align:middle;cursor:pointer;}
+.milestone-table tr:last-child td{border-bottom:none;}
+.milestone-table tbody tr:hover{background:#fafafa;}
+.stage-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;}
+.badge-s1{background:#e3f2fd;color:#1565c0;}
+.badge-s2{background:#f3e5f5;color:#7b1fa2;}
+.badge-s3{background:#e8f5e9;color:#2e7d32;}
+.badge-s4{background:#fff3e0;color:#e65100;}
+.badge-s5{background:#fce4ec;color:#c62828;}
+.dday-badge{display:inline-block;padding:4px 8px;border-radius:8px;font-size:0.75rem;font-weight:700;min-width:36px;text-align:center;}
+.dday-urgent{background:#fee;color:#d32f2f;}
+.dday-normal{background:#e3f2fd;color:#1565c0;}
+.dday-none{background:#f5f5f5;color:#999;}
+.progress-dots{display:flex;gap:3px;}
+.progress-dots span{width:8px;height:8px;border-radius:50%;background:#e0e0e0;}
+.progress-dots span.active{background:#4ade80;}
+.company-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+.company-card{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;cursor:pointer;transition:box-shadow .2s;}
+.company-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.company-card .c-name{font-size:1rem;font-weight:700;}
+.company-card .c-sector{font-size:0.78rem;color:#999;margin-bottom:2px;}
+.company-card .c-amount{font-size:1.05rem;font-weight:700;margin-bottom:2px;}
+.company-card .c-date{font-size:0.75rem;color:#aaa;margin-bottom:6px;}
+.company-card .c-manager{font-size:0.75rem;margin-top:6px;}
+.company-card .c-manager .mgr-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;margin-right:4px;}
+.progress-bar{height:6px;border-radius:3px;background:#eee;display:flex;overflow:hidden;gap:2px;}
+.progress-bar .seg{height:100%;border-radius:3px;flex:1;}
+.seg-done{background:#4ade80;}
+.seg-current{background:#3b82f6;}
+.seg-future{background:#e0e0e0;}
+.footer-note{text-align:center;font-size:0.75rem;color:#bbb;padding:20px 0;}
+/* Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1000;justify-content:center;align-items:center;}
+.modal-overlay.active{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:28px;width:92%;max-width:560px;max-height:88vh;overflow-y:auto;}
+.modal h2{font-size:1.15rem;margin-bottom:20px;font-weight:700;}
+/* Detail modal layout */
+.detail-header{margin-bottom:20px;}
+.detail-header h2{font-size:1.2rem;margin-bottom:12px;}
+.detail-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:0.85rem;}
+.detail-meta .dm-label{color:#999;font-size:0.75rem;display:block;}
+.detail-meta .dm-value{font-weight:600;margin-top:2px;}
+.detail-meta .dm-item{min-width:60px;}
+.detail-section{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;}
+.detail-section h3{font-size:0.9rem;font-weight:600;margin-bottom:10px;color:#555;}
+.history-timeline{position:relative;padding-left:20px;}
+.history-timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e0e0e0;}
+.history-item{position:relative;padding:6px 0 6px 16px;display:flex;justify-content:space-between;align-items:center;}
+.history-item::before{content:'';position:absolute;left:-14px;top:12px;width:8px;height:8px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:1;}
+.history-item .h-date{font-size:0.82rem;color:#999;min-width:90px;}
+.history-item .h-stage{font-size:0.85rem;font-weight:500;}
+.history-item .h-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.75rem;padding:2px 6px;}
+.history-item .h-del:hover{color:#d32f2f;}
+.add-history-row{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+.add-history-row select,.add-history-row input{padding:6px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:0.82rem;font-family:inherit;}
+.next-stage-row{display:flex;gap:12px;align-items:flex-start;margin-top:8px;flex-wrap:wrap;}
+.next-stage-row .ns-group{display:flex;flex-direction:column;gap:4px;}
+.next-stage-row .ns-group label{font-size:0.75rem;color:#999;}
+.next-stage-row .ns-group select,.next-stage-row .ns-group input{padding:6px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:0.82rem;font-family:inherit;}
+.next-stage-hint{font-size:0.72rem;color:#bbb;margin-top:6px;}
+.detail-actions{display:flex;gap:8px;margin-top:24px;justify-content:space-between;align-items:center;}
+.detail-actions-left{display:flex;gap:8px;}
+.detail-actions-right{display:flex;gap:8px;}
+/* Form (add modal) */
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:0.8rem;color:#666;margin-bottom:4px;font-weight:500;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.9rem;outline:none;font-family:inherit;}
+.form-group input:focus,.form-group select:focus{border-color:#1a1a1a;}
+.form-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){
+.company-cards-grid{grid-template-columns:1fr;}
+.detail-meta{gap:10px;}
+.form-row{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>투자 파이프라인 현황판</h1>
-  <p class="subtitle">5단계 프로세스 · 담당자 관리 · 데이터는 Firebase에서 실시간 동기화됩니다</p>
-
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <span class="status-dot"></span> 실시간 · <span id="todayDate"></span>
-    </div>
-    <div class="toolbar-right">
-      <button class="btn" onclick="openManagerModal()">담당자 관리</button>
-      <button class="btn" onclick="exportJSON()">내보내기</button>
-      <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-      <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
-    </div>
+  <p class="subtitle">5단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</p>
+  <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
+  <div class="btn-row">
+    <button class="btn" onclick="exportJSON()">데이터 내보내기</button>
+    <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
+    <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div></div>
+    <div class="summary-card"><div class="label">가장 임박한 일정</div><div class="value" id="sumNearest">-</div><div class="sub" id="sumNearestSub"></div></div>
+    <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
   </div>
 
-  <div class="kpis">
-    <div class="kpi"><div class="kpi-label">검토 기업 수</div><div class="kpi-value" id="kpiCount">0개사</div><div class="kpi-sub">전체 파이프라인</div></div>
-    <div class="kpi"><div class="kpi-label">투자 예정 총액</div><div class="kpi-value" id="kpiAmount">0억</div><div class="kpi-sub" id="kpiAmountSub"></div></div>
-    <div class="kpi"><div class="kpi-label">가장 임박한 일정</div><div class="kpi-value" id="kpiNearest">-</div><div class="kpi-sub" id="kpiNearestSub"></div></div>
-    <div class="kpi"><div class="kpi-label">납입 완료</div><div class="kpi-value" id="kpiDone">0억</div><div class="kpi-sub" id="kpiDoneSub"></div></div>
-  </div>
+  <div class="section-title">파이프라인 (5단계) <span class="hint">카드 클릭 시 상세/이력 편집</span></div>
+  <div class="pipeline-stages" id="pipelineStages"></div>
 
-  <div class="section-title">파이프라인 (5단계) <span class="muted">카드 클릭 시 상세/이력 편집</span></div>
-  <div class="pipeline" id="pipeline"></div>
+  <div class="section-title">기업별 상세</div>
+  <div class="company-cards-grid" id="companyCards"></div>
 
   <div class="section-title">다음 마일스톤 (임박순)</div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>기업명</th><th>섹터</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
-      <tbody id="milestoneBody"></tbody>
-    </table>
-  </div>
+  <table class="milestone-table">
+    <thead><tr><th>기업명</th><th>섹터</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
+    <tbody id="milestoneBody"></tbody>
+  </table>
 
   <div class="footer-note">데이터는 Firebase에 실시간 저장됩니다. 모든 기기에서 동일한 데이터가 표시됩니다.</div>
 </div>
 
-<!-- Add/Edit Modal -->
-<div class="modal-bg hidden" id="dealModalBg" onclick="if(event.target===this)closeDealModal()">
+<!-- Add Modal -->
+<div class="modal-overlay" id="addModal">
 <div class="modal">
-  <div class="modal-title" id="dealModalTitle">기업 추가</div>
-  <input type="hidden" id="editId">
-  <div class="modal-row"><label>회사명</label><input id="fName" placeholder="(주)회사명"></div>
-  <div class="modal-row"><label>섹터</label><input id="fSector" placeholder="소비재, AI, 반도체 등"></div>
-  <div class="modal-row"><label>금액 (억)</label><input id="fAmount" type="number" placeholder="30"></div>
-  <div class="modal-row"><label>담당자</label><select id="fManager"><option value="">미지정</option></select></div>
-  <div class="modal-row"><label>현재 단계</label>
-    <select id="fStage"><option value="s1">S1 - 투자팀 IR</option><option value="s2">S2 - 공식 IR</option><option value="s3">S3 - 투자심의위원회</option><option value="s4">S4 - 투자계약</option><option value="s5">S5 - 투자금 납입</option></select>
+  <h2>기업 추가</h2>
+  <div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div>
+  <div class="form-row">
+    <div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div>
+    <div class="form-group"><label>담당자</label><input id="aManager" placeholder="홍길동"></div>
   </div>
-  <div class="modal-row"><label>진입일</label><input id="fDate" type="date"></div>
-  <div class="modal-row"><label>다음 단계</label>
-    <select id="fNextStage"><option value="">미정</option><option value="s1">S1 - 투자팀 IR</option><option value="s2">S2 - 공식 IR</option><option value="s3">S3 - 투자심의위원회</option><option value="s4">S4 - 투자계약</option><option value="s5">S5 - 투자금 납입</option></select>
+  <div class="form-row">
+    <div class="form-group"><label>투자금액 (억)</label><input id="aAmount" type="number" placeholder="30"></div>
+    <div class="form-group"><label>현재 단계</label>
+      <select id="aStage"><option value="s1">S1 - 투자팀 IR</option><option value="s2">S2 - 공식 IR</option><option value="s3">S3 - 투자심의위원회</option><option value="s4">S4 - 투자계약</option><option value="s5">S5 - 투자금 납입</option></select>
+    </div>
   </div>
-  <div class="modal-row"><label>예정일</label><input id="fNextDate" type="date"></div>
-  <div class="modal-row"><label>비고</label><textarea id="fNote" rows="2" placeholder="메모" style="resize:vertical;"></textarea></div>
-  <div class="modal-actions">
-    <button class="btn" onclick="closeDealModal()">취소</button>
-    <button class="btn btn-primary" onclick="saveDeal()">저장</button>
+  <div class="form-row">
+    <div class="form-group"><label>진입일</label><input id="aDate" type="date"></div>
+    <div class="form-group"><label>비고</label><input id="aNote" placeholder="메모"></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn" onclick="closeAddModal()">취소</button>
+    <button class="btn btn-primary" onclick="saveNewDeal()">저장</button>
   </div>
 </div>
 </div>
 
 <!-- Detail Modal -->
-<div class="modal-bg hidden" id="detailModalBg" onclick="if(event.target===this)closeDetailModal()">
+<div class="modal-overlay" id="detailModal">
 <div class="modal" id="detailModalContent"></div>
-</div>
-
-<!-- Manager Modal -->
-<div class="modal-bg hidden" id="managerModalBg" onclick="if(event.target===this)closeManagerModal()">
-<div class="modal">
-  <div class="modal-title">담당자 관리</div>
-  <div class="manager-list" id="managerList"></div>
-  <div class="add-manager-form">
-    <input id="newMgrName" placeholder="이름">
-    <input id="newMgrRole" placeholder="역할 (심사역, 팀장 등)">
-    <button class="btn btn-primary btn-sm" onclick="addManager()">추가</button>
-  </div>
-  <div class="modal-actions">
-    <button class="btn" onclick="closeManagerModal()">닫기</button>
-  </div>
-</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -307,428 +186,298 @@ firebase.initializeApp({
   messagingSenderId:"219848294450",
   appId:"1:219848294450:web:58d3fc2fe65d40d8ee3c2b"
 });
-const db = firebase.firestore();
-const dealsRef = db.collection('deals');
-const managersRef = db.collection('managers');
+const db=firebase.firestore();
+const dealsRef=db.collection('deals');
 
-const STAGES = {s1:'투자팀 IR', s2:'공식 IR', s3:'투자심의위원회', s4:'투자계약', s5:'투자금 납입'};
-const STAGE_KEYS = ['s1','s2','s3','s4','s5'];
-const AVATAR_COLORS = [
-  {bg:'#E8DEF8',color:'#4A148C'},{bg:'#D1E8FF',color:'#0D47A1'},
-  {bg:'#C8E6C9',color:'#1B5E20'},{bg:'#FFE0B2',color:'#E65100'},
-  {bg:'#F8BBD0',color:'#880E4F'},{bg:'#B2EBF2',color:'#006064'}
-];
-let companies = [];
-let managers = [];
+const STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약',s5:'투자금 납입'};
+const STAGE_KEYS=['s1','s2','s3','s4','s5'];
+const MGR_COLORS=['#e8f5e9:#2e7d32','#e3f2fd:#1565c0','#fff3e0:#e65100','#f3e5f5:#7b1fa2','#fce4ec:#c62828','#e0f2f1:#00695c'];
+let companies=[];
 
-document.getElementById('todayDate').textContent = new Date().toISOString().slice(0,10);
+document.getElementById('todayDate').textContent='오늘: '+new Date().toISOString().slice(0,10);
+document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
 
-// ─── Firebase listeners ───
-managersRef.orderBy('name').onSnapshot(snap => {
-  managers = [];
-  snap.forEach(doc => managers.push({id:doc.id, ...doc.data()}));
-  populateManagerSelect();
+dealsRef.orderBy('name').onSnapshot(snap=>{
+  companies=[];
+  snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));
   renderAll();
 });
 
-dealsRef.orderBy('name').onSnapshot(snap => {
-  companies = [];
-  snap.forEach(doc => companies.push({id:doc.id, ...doc.data()}));
-  renderAll();
-});
+function renderAll(){renderSummary();renderPipeline();renderMilestones();renderCards();}
 
-// ─── Helpers ───
-function getStageIndex(s) { return STAGE_KEYS.indexOf(s); }
-
-function getCurrentStage(c) {
-  if (!c.history || c.history.length === 0) return {stage:'s1', date:''};
-  let best = c.history[0];
-  for (let i = 1; i < c.history.length; i++) {
-    const ci = getStageIndex(c.history[i].stage), bi = getStageIndex(best.stage);
-    if (ci > bi || (ci === bi && (c.history[i].date||'') > (best.date||''))) best = c.history[i];
-  }
-  return best;
+function getCurrentStage(c){
+  if(!c.history||c.history.length===0)return{stage:'s1',date:''};
+  return c.history[c.history.length-1];
 }
-
-function getDday(dateStr) {
-  if (!dateStr) return null;
-  const t = new Date(); t.setHours(0,0,0,0);
-  const d = new Date(dateStr); d.setHours(0,0,0,0);
-  return Math.ceil((d - t) / 86400000);
+function getStageIndex(s){return STAGE_KEYS.indexOf(s);}
+function getDday(dateStr){
+  if(!dateStr)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(dateStr);target.setHours(0,0,0,0);
+  return Math.ceil((target-today)/(1000*60*60*24));
 }
-
-function ddayHtml(dateStr) {
-  const d = getDday(dateStr);
-  if (d === null) return '<span class="dday dday-tbd">미정</span>';
-  if (d < 0) return `<span class="dday dday-past">D+${Math.abs(d)}</span>`;
-  if (d <= 3) return `<span class="dday dday-urgent">D-${d}</span>`;
-  if (d <= 14) return `<span class="dday dday-soon">D-${d}</span>`;
-  return `<span class="dday dday-ok">D-${d}</span>`;
+function getMgrColor(name){
+  if(!name)return{bg:'#f5f5f5',fg:'#999'};
+  let hash=0;for(let i=0;i<name.length;i++)hash=name.charCodeAt(i)+((hash<<5)-hash);
+  const c=MGR_COLORS[Math.abs(hash)%MGR_COLORS.length].split(':');
+  return{bg:c[0],fg:c[1]};
 }
+function stageBadgeClass(s){return 'badge-'+s;}
 
-function getManager(id) { return managers.find(m => m.id === id) || null; }
-
-function avatarColor(idx) { return AVATAR_COLORS[idx % AVATAR_COLORS.length]; }
-
-function managerAvatar(managerId, size) {
-  const m = getManager(managerId);
-  if (!m) return '';
-  const idx = managers.indexOf(m);
-  const c = avatarColor(idx);
-  const cls = size === 'lg' ? 'avatar avatar-lg' : 'avatar';
-  const initial = m.name.slice(-2);
-  return `<span class="${cls}" style="background:${c.bg};color:${c.color}">${initial}</span>`;
-}
-
-function managerHtml(managerId) {
-  const m = getManager(managerId);
-  if (!m) return '<span class="manager-empty">미지정</span>';
-  return `<span class="manager-cell">${managerAvatar(managerId)}  <span class="manager-name">${m.name}</span></span>`;
-}
-
-function progressBar(stageKey) {
-  const idx = getStageIndex(stageKey);
-  let h = '<div class="progress-bar">';
-  for (let i = 0; i < 5; i++) {
-    if (i < idx) h += '<div class="progress-seg done"></div>';
-    else if (i === idx) h += '<div class="progress-seg current"></div>';
-    else h += '<div class="progress-seg"></div>';
-  }
-  return h + '</div>';
-}
-
-function progressDots(stageKey) {
-  const idx = getStageIndex(stageKey);
-  let h = '<div style="display:flex;gap:3px;">';
-  for (let i = 0; i < 5; i++) {
-    const bg = i <= idx ? '#1D9E75' : 'var(--border)';
-    h += `<span style="width:8px;height:8px;border-radius:50%;background:${bg};display:inline-block;"></span>`;
-  }
-  return h + '</div>';
-}
-
-// ─── Render All ───
-function renderAll() {
-  renderKPIs();
-  renderPipeline();
-  renderMilestones();
-}
-
-function renderKPIs() {
-  document.getElementById('kpiCount').textContent = companies.length + '개사';
-  const total = companies.reduce((s,c) => s + (c.amount||0), 0);
-  document.getElementById('kpiAmount').textContent = total + '억';
-  document.getElementById('kpiAmountSub').textContent = companies.length + '개사 합계';
-
-  let nearest = null, nearComp = null;
-  companies.forEach(c => {
-    if (c.plannedNext && c.plannedNext.date) {
-      const d = getDday(c.plannedNext.date);
-      if (d !== null && d >= 0 && (nearest === null || d < nearest)) { nearest = d; nearComp = c; }
+function renderSummary(){
+  document.getElementById('sumCount').textContent=companies.length+'개사';
+  const totalAmt=companies.reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('sumAmount').textContent=totalAmt+'억';
+  document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
+  let nearest=null,nearestComp=null;
+  companies.forEach(c=>{
+    if(c.plannedNext&&c.plannedNext.date){
+      const d=getDday(c.plannedNext.date);
+      if(d!==null&&d>=0&&(nearest===null||d<nearest)){nearest=d;nearestComp=c;}
     }
   });
-  if (nearComp && nearComp.plannedNext) {
-    document.getElementById('kpiNearest').textContent = (nearComp.plannedNext.date||'').slice(5).replace('-','/');
-    document.getElementById('kpiNearestSub').textContent = nearComp.name + ' · ' + STAGES[nearComp.plannedNext.stage||'s5'];
-  } else {
-    document.getElementById('kpiNearest').textContent = '-';
-    document.getElementById('kpiNearestSub').textContent = '';
-  }
-
-  const done = companies.filter(c => getCurrentStage(c).stage === 's5');
-  document.getElementById('kpiDone').textContent = done.reduce((s,c) => s + (c.amount||0), 0) + '억';
-  document.getElementById('kpiDoneSub').textContent = done.length + '개사';
+  if(nearestComp&&nearestComp.plannedNext){
+    document.getElementById('sumNearest').textContent=(nearestComp.plannedNext.date||'').slice(5).replace('-','/');
+    document.getElementById('sumNearestSub').textContent=nearestComp.name+' · '+STAGES[nearestComp.plannedNext.stage||'s5'];
+  }else{document.getElementById('sumNearest').textContent='-';document.getElementById('sumNearestSub').textContent='';}
+  const doneComps=companies.filter(c=>getCurrentStage(c).stage==='s5');
+  const doneAmt=doneComps.reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('sumDone').textContent=doneAmt+'억';
+  document.getElementById('sumDoneSub').textContent=doneComps.length+'개사';
 }
 
-function renderPipeline() {
-  const el = document.getElementById('pipeline');
-  let html = '';
-  STAGE_KEYS.forEach(sk => {
-    const inStage = companies.filter(c => getCurrentStage(c).stage === sk);
-    const amt = inStage.reduce((s,c) => s + (c.amount||0), 0);
-    html += `<div class="stage-col">
-      <div class="stage-head">${STAGES[sk]}<div class="stage-count">${inStage.length}개사 · ${amt}억</div></div>`;
-    if (inStage.length === 0) {
-      html += '<div class="empty-col">해당 없음</div>';
-    } else {
-      inStage.forEach(c => {
-        const cur = getCurrentStage(c);
-        const entryDate = cur.date ? cur.date.slice(5).replace('-','/') : '';
-        html += `<div class="card" onclick="openDetail('${c.id}')">
-          <div class="card-name">${c.name}</div>
-          <div class="card-sector">${c.sector||''}</div>
-          <div class="card-amount">${c.amount||0}억</div>
-          <div class="card-entered">진입 ${entryDate}</div>
-          ${c.managerId ? `<div class="card-manager">${managerAvatar(c.managerId)} ${getManager(c.managerId)?.name||''}</div>` : ''}
-          ${progressBar(cur.stage)}
-        </div>`;
-      });
+function renderPipeline(){
+  const el=document.getElementById('pipelineStages');
+  let html='';
+  STAGE_KEYS.forEach(sk=>{
+    const inStage=companies.filter(c=>getCurrentStage(c).stage===sk);
+    const amt=inStage.reduce((s,c)=>s+(c.amount||0),0);
+    html+=`<div class="pipeline-stage"><div class="stage-name">${STAGES[sk]}</div><div class="stage-stat">${inStage.length}개사 · ${amt}억</div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+function renderMilestones(){
+  const el=document.getElementById('milestoneBody');
+  const sorted=[...companies].sort((a,b)=>{
+    const da=a.plannedNext&&a.plannedNext.date?new Date(a.plannedNext.date):new Date('2099-12-31');
+    const db2=b.plannedNext&&b.plannedNext.date?new Date(b.plannedNext.date):new Date('2099-12-31');
+    return da-db2;
+  });
+  let html='';
+  sorted.forEach(c=>{
+    const cur=getCurrentStage(c);
+    const curIdx=getStageIndex(cur.stage);
+    const nextLabel=c.plannedNext&&c.plannedNext.stage?STAGES[c.plannedNext.stage]:'미정';
+    const nextDate=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
+    const dday=c.plannedNext&&c.plannedNext.date?getDday(c.plannedNext.date):null;
+    let ddayHtml='';
+    if(dday===null){ddayHtml='<span class="dday-badge dday-none">미정</span>';}
+    else if(dday<0){ddayHtml=`<span class="dday-badge dday-urgent">D+${Math.abs(dday)}</span>`;}
+    else if(dday<=7){ddayHtml=`<span class="dday-badge dday-urgent">D-${dday}</span>`;}
+    else{ddayHtml=`<span class="dday-badge dday-normal">D-${dday}</span>`;}
+    let dots='<div class="progress-dots">';
+    for(let i=0;i<5;i++){dots+=`<span class="${i<=curIdx?'active':''}"></span>`;}
+    dots+='</div>';
+    const mc=getMgrColor(c.manager);
+    const mgrHtml=c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;">${c.manager}</span>`:'<span style="color:#ccc;font-size:0.8rem;">-</span>';
+    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${mgrHtml}</td><td><span class="stage-badge ${stageBadgeClass(cur.stage)}">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
+  });
+  el.innerHTML=html;
+}
+
+function renderCards(){
+  const el=document.getElementById('companyCards');
+  // group by stage
+  const grouped={};
+  STAGE_KEYS.forEach(sk=>grouped[sk]=[]);
+  companies.forEach(c=>{const s=getCurrentStage(c).stage;if(grouped[s])grouped[s].push(c);});
+  let html='';
+  companies.forEach(c=>{
+    const cur=getCurrentStage(c);
+    const curIdx=getStageIndex(cur.stage);
+    let bar='<div class="progress-bar">';
+    for(let i=0;i<5;i++){
+      if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;
+      else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;
+      else bar+=`<div class="seg seg-future"></div>`;
     }
-    html += '</div>';
+    bar+='</div>';
+    const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
+    const mc=getMgrColor(c.manager);
+    const mgrHtml=c.manager?`<span class="mgr-badge" style="background:${mc.bg};color:${mc.fg};">${c.manager}</span>`:'';
+    html+=`<div class="company-card" onclick="openDetail('${c.id}')">
+      <div class="c-name">${c.name}</div>
+      <div class="c-sector">${c.sector||''}</div>
+      <div class="c-amount">${c.amount||0}억</div>
+      <div class="c-date">진입: ${entryDate}</div>
+      ${bar}
+      <div class="c-manager">${mgrHtml}</div>
+    </div>`;
   });
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
 
-function renderMilestones() {
-  const el = document.getElementById('milestoneBody');
-  const sorted = [...companies].sort((a,b) => {
-    const da = a.plannedNext && a.plannedNext.date ? new Date(a.plannedNext.date) : new Date('2099-12-31');
-    const db2 = b.plannedNext && b.plannedNext.date ? new Date(b.plannedNext.date) : new Date('2099-12-31');
-    return da - db2;
+// === Add Modal ===
+function openAddModal(){
+  document.getElementById('aName').value='';
+  document.getElementById('aSector').value='';
+  document.getElementById('aManager').value='';
+  document.getElementById('aAmount').value='';
+  document.getElementById('aStage').value='s1';
+  document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('aNote').value='';
+  document.getElementById('addModal').classList.add('active');
+}
+function closeAddModal(){document.getElementById('addModal').classList.remove('active');}
+
+async function saveNewDeal(){
+  const name=document.getElementById('aName').value.trim();
+  if(!name){alert('회사명을 입력하세요');return;}
+  const sector=document.getElementById('aSector').value.trim();
+  const manager=document.getElementById('aManager').value.trim();
+  const amount=parseInt(document.getElementById('aAmount').value)||0;
+  const stage=document.getElementById('aStage').value;
+  const date=document.getElementById('aDate').value;
+  const note=document.getElementById('aNote').value.trim();
+  await dealsRef.add({
+    name,sector,manager,amount,
+    history:[{stage,date}],
+    plannedNext:{stage:null,date:null},
+    note
   });
-  let html = '';
-  sorted.forEach(c => {
-    const cur = getCurrentStage(c);
-    const nextLabel = c.plannedNext && c.plannedNext.stage ? STAGES[c.plannedNext.stage] : '미정';
-    const nextDate = c.plannedNext && c.plannedNext.date ? c.plannedNext.date.slice(5).replace('-','/') : '미정';
-    const dd = c.plannedNext && c.plannedNext.date ? ddayHtml(c.plannedNext.date) : '<span class="dday dday-tbd">미정</span>';
-    html += `<tr>
-      <td><strong>${c.name}</strong></td>
-      <td><span class="sector-badge">${c.sector||'-'}</span></td>
-      <td>${managerHtml(c.managerId)}</td>
-      <td><span class="stage-badge ${cur.stage}">${STAGES[cur.stage]}</span></td>
-      <td>${c.amount||0}억</td>
-      <td>${nextLabel} · ${nextDate}</td>
-      <td>${dd}</td>
-      <td>${progressDots(cur.stage)}</td>
-    </tr>`;
-  });
-  el.innerHTML = html;
+  closeAddModal();
 }
 
-// ─── Manager Select ───
-function populateManagerSelect() {
-  const sel = document.getElementById('fManager');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">미지정</option>';
-  managers.forEach(m => { sel.innerHTML += `<option value="${m.id}">${m.name} (${m.role||''})</option>`; });
-  sel.value = cur;
-}
+// === Detail Modal ===
+function openDetail(id){
+  const c=companies.find(x=>x.id===id);if(!c)return;
+  const cur=getCurrentStage(c);
+  const mc=getMgrColor(c.manager);
+  let html=`<div class="detail-header"><h2>${c.name}</h2>
+    <div class="detail-meta">
+      <div class="dm-item"><span class="dm-label">섹터</span><span class="dm-value">${c.sector||'-'}</span></div>
+      <div class="dm-item"><span class="dm-label">금액</span><span class="dm-value">${c.amount||0}억</span></div>
+      <div class="dm-item"><span class="dm-label">현재 단계</span><span class="dm-value"><span class="stage-badge ${stageBadgeClass(cur.stage)}">${STAGES[cur.stage]}</span></span></div>
+      <div class="dm-item"><span class="dm-label">담당자</span><span class="dm-value">${c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.78rem;font-weight:600;">${c.manager}</span>`:'미지정'}</span></div>
+    </div></div>`;
 
-// ─── Deal Modal ───
-function openAddModal() {
-  document.getElementById('dealModalTitle').textContent = '기업 추가';
-  document.getElementById('editId').value = '';
-  document.getElementById('fName').value = '';
-  document.getElementById('fSector').value = '';
-  document.getElementById('fAmount').value = '';
-  document.getElementById('fManager').value = '';
-  document.getElementById('fStage').value = 's1';
-  document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
-  document.getElementById('fNextStage').value = '';
-  document.getElementById('fNextDate').value = '';
-  document.getElementById('fNote').value = '';
-  document.getElementById('dealModalBg').classList.remove('hidden');
-}
-
-function openEditModal(id) {
-  const c = companies.find(x => x.id === id); if (!c) return;
-  const cur = getCurrentStage(c);
-  document.getElementById('dealModalTitle').textContent = '기업 수정';
-  document.getElementById('editId').value = id;
-  document.getElementById('fName').value = c.name || '';
-  document.getElementById('fSector').value = c.sector || '';
-  document.getElementById('fAmount').value = c.amount || '';
-  document.getElementById('fManager').value = c.managerId || '';
-  document.getElementById('fStage').value = cur.stage || 's1';
-  document.getElementById('fDate').value = cur.date || '';
-  document.getElementById('fNextStage').value = c.plannedNext && c.plannedNext.stage ? c.plannedNext.stage : '';
-  document.getElementById('fNextDate').value = c.plannedNext && c.plannedNext.date ? c.plannedNext.date : '';
-  document.getElementById('fNote').value = c.note || '';
-  closeDetailModal();
-  document.getElementById('dealModalBg').classList.remove('hidden');
-}
-
-function closeDealModal() { document.getElementById('dealModalBg').classList.add('hidden'); }
-
-async function saveDeal() {
-  const id = document.getElementById('editId').value;
-  const name = document.getElementById('fName').value.trim();
-  if (!name) { alert('회사명을 입력하세요'); return; }
-  const sector = document.getElementById('fSector').value.trim();
-  const amount = parseInt(document.getElementById('fAmount').value) || 0;
-  const managerId = document.getElementById('fManager').value || null;
-  const stage = document.getElementById('fStage').value;
-  const date = document.getElementById('fDate').value;
-  const nextStage = document.getElementById('fNextStage').value;
-  const nextDate = document.getElementById('fNextDate').value;
-  const note = document.getElementById('fNote').value.trim();
-
-  if (id) {
-    const old = companies.find(x => x.id === id);
-    let history = old && old.history ? [...old.history] : [];
-    const oldCur = getCurrentStage(old);
-    if (oldCur.stage !== stage || oldCur.date !== date) {
-      const last = history.length > 0 ? history[history.length-1] : null;
-      if (!last || last.stage !== stage || last.date !== date) {
-        history.push({stage, date});
-      }
-    }
-    await dealsRef.doc(id).update({name, sector, amount, managerId, history, plannedNext:{stage:nextStage||null, date:nextDate||null}, note});
-  } else {
-    await dealsRef.add({name, sector, amount, managerId, history:[{stage, date}], plannedNext:{stage:nextStage||null, date:nextDate||null}, note});
-  }
-  closeDealModal();
-}
-
-// ─── Detail Modal ───
-function openDetail(id) {
-  const c = companies.find(x => x.id === id); if (!c) return;
-  const cur = getCurrentStage(c);
-  const m = getManager(c.managerId);
-
-  let html = `<div class="modal-title">${c.name}</div>`;
-  html += `<div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px;">`;
-  html += `<div><span style="font-size:12px;color:var(--text-secondary)">섹터</span><br><span class="sector-badge">${c.sector||'-'}</span></div>`;
-  html += `<div><span style="font-size:12px;color:var(--text-secondary)">금액</span><br><strong>${c.amount||0}억</strong></div>`;
-  html += `<div><span style="font-size:12px;color:var(--text-secondary)">현재 단계</span><br><span class="stage-badge ${cur.stage}">${STAGES[cur.stage]}</span></div>`;
-  html += `<div><span style="font-size:12px;color:var(--text-secondary)">담당자</span><br>${managerHtml(c.managerId)}</div>`;
-  html += `</div>`;
-
-  if (c.plannedNext && (c.plannedNext.stage || c.plannedNext.date)) {
-    html += `<div style="margin-bottom:12px;font-size:13px;"><strong>다음 단계:</strong> ${c.plannedNext.stage?STAGES[c.plannedNext.stage]:'미정'} · ${c.plannedNext.date||'미정'} ${c.plannedNext.date?ddayHtml(c.plannedNext.date):''}</div>`;
-  }
-  if (c.note) html += `<div style="margin-bottom:12px;font-size:13px;padding:8px;background:var(--bg-secondary);border-radius:var(--radius-md);">${c.note}</div>`;
-
-  html += `<div class="history-block"><div class="history-title">진행 이력</div>`;
-  if (c.history && c.history.length > 0) {
-    const sorted = [...c.history].sort((a,b) => (a.date||'').localeCompare(b.date||''));
-    sorted.forEach((h, i) => {
-      const isCurrent = (h.stage === cur.stage && h.date === cur.date);
-      html += `<div class="history-item${isCurrent?' history-current':''}">
-        <span class="history-date">${h.date||''}</span>
-        <span class="stage-badge ${h.stage}">${STAGES[h.stage]||h.stage}</span>
+  // History
+  html+=`<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">`;
+  if(c.history&&c.history.length>0){
+    c.history.forEach((h,i)=>{
+      html+=`<div class="history-item">
+        <span class="h-date">${h.date||''}</span>
+        <span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span>
+        <button class="h-del" onclick="deleteHistory('${c.id}',${i})" title="삭제">✕</button>
       </div>`;
     });
-  } else {
-    html += '<div style="font-size:12px;color:var(--text-tertiary);padding:8px;">이력 없음</div>';
   }
-  html += '</div>';
+  html+=`</div>`;
+  // Add history row
+  html+=`<div class="add-history-row">
+    <select id="newHistStage">${STAGE_KEYS.map(sk=>`<option value="${sk}">${STAGES[sk]}</option>`).join('')}</select>
+    <input type="date" id="newHistDate" value="${new Date().toISOString().slice(0,10)}">
+    <button class="btn btn-sm btn-primary" onclick="addHistory('${c.id}')">+ 단계 기록</button>
+  </div></div>`;
 
-  html += `<div class="modal-actions" style="justify-content:space-between;">
-    <div class="danger-zone" style="margin:0;padding:0;background:none;">
-      <button class="btn btn-sm" style="color:var(--danger);border-color:var(--danger);" onclick="deleteDeal('${c.id}','${c.name.replace(/'/g,"\\'")}')">삭제</button>
+  // Next stage
+  html+=`<div class="detail-section"><h3>다음 예상 단계</h3>
+    <div class="next-stage-row">
+      <div class="ns-group"><label>단계</label><select id="nextStageSelect">
+        <option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}
+      </select></div>
+      <div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="${c.plannedNext&&c.plannedNext.date?c.plannedNext.date:''}"></div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" onclick="closeDetailModal()">닫기</button>
-      <button class="btn btn-primary" onclick="openEditModal('${c.id}')">수정</button>
+    <div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div>
+  </div>`;
+
+  // Note
+  html+=`<div class="detail-section"><h3>비고</h3>
+    <textarea id="detailNote" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;resize:vertical;">${c.note||''}</textarea>
+  </div>`;
+
+  // Actions
+  html+=`<div class="detail-actions">
+    <div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div>
+    <div class="detail-actions-right">
+      <button class="btn btn-sm" onclick="closeDetailModal()">닫기</button>
+      <button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button>
     </div>
   </div>`;
 
-  document.getElementById('detailModalContent').innerHTML = html;
-  document.getElementById('detailModalBg').classList.remove('hidden');
+  document.getElementById('detailModalContent').innerHTML=html;
+  document.getElementById('detailModal').classList.add('active');
 }
 
-function closeDetailModal() { document.getElementById('detailModalBg').classList.add('hidden'); }
+function closeDetailModal(){document.getElementById('detailModal').classList.remove('active');}
 
-async function deleteDeal(id, name) {
-  if (confirm(name + ' 삭제하시겠습니까?')) {
+async function addHistory(id){
+  const stage=document.getElementById('newHistStage').value;
+  const date=document.getElementById('newHistDate').value;
+  const c=companies.find(x=>x.id===id);if(!c)return;
+  const history=c.history?[...c.history]:[];
+  history.push({stage,date});
+  await dealsRef.doc(id).update({history});
+  setTimeout(()=>openDetail(id),300);
+}
+
+async function deleteHistory(id,index){
+  const c=companies.find(x=>x.id===id);if(!c)return;
+  if(c.history.length<=1){alert('최소 1개의 이력이 필요합니다.');return;}
+  const history=[...c.history];
+  history.splice(index,1);
+  await dealsRef.doc(id).update({history});
+  setTimeout(()=>openDetail(id),300);
+}
+
+async function saveDetail(id){
+  const nextStage=document.getElementById('nextStageSelect').value||null;
+  const nextDate=document.getElementById('nextStageDate').value||null;
+  const note=document.getElementById('detailNote').value.trim();
+  await dealsRef.doc(id).update({
+    plannedNext:{stage:nextStage,date:nextDate},
+    note
+  });
+  closeDetailModal();
+}
+
+async function deleteDeal(id){
+  const c=companies.find(x=>x.id===id);
+  if(!c)return;
+  if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){
     await dealsRef.doc(id).delete();
     closeDetailModal();
   }
 }
 
-// ─── Manager Modal ───
-function openManagerModal() {
-  renderManagerList();
-  document.getElementById('managerModalBg').classList.remove('hidden');
-}
-function closeManagerModal() { document.getElementById('managerModalBg').classList.add('hidden'); }
-
-function renderManagerList() {
-  const el = document.getElementById('managerList');
-  if (managers.length === 0) {
-    el.innerHTML = '<div style="text-align:center;padding:16px;font-size:13px;color:var(--text-tertiary);">등록된 담당자가 없습니다.</div>';
-    return;
-  }
-  let html = '';
-  managers.forEach((m, i) => {
-    const cnt = companies.filter(c => c.managerId === m.id).length;
-    const c = avatarColor(i);
-    html += `<div class="manager-list-item">
-      <span class="avatar" style="background:${c.bg};color:${c.color}">${m.name.slice(-2)}</span>
-      <div class="manager-list-info">
-        <div class="manager-list-name">${m.name}</div>
-        <div class="manager-list-meta">${m.role||''} · ${cnt}개사 담당</div>
-      </div>
-      <button class="icon-btn danger" onclick="deleteManager('${m.id}','${m.name.replace(/'/g,"\\'")}')">✕</button>
-    </div>`;
-  });
-  el.innerHTML = html;
-}
-
-async function addManager() {
-  const name = document.getElementById('newMgrName').value.trim();
-  const role = document.getElementById('newMgrRole').value.trim();
-  if (!name) { alert('이름을 입력하세요'); return; }
-  await managersRef.add({name, role});
-  document.getElementById('newMgrName').value = '';
-  document.getElementById('newMgrRole').value = '';
-}
-
-async function deleteManager(id, name) {
-  const assigned = companies.filter(c => c.managerId === id);
-  if (assigned.length > 0) {
-    if (!confirm(`${name}님은 ${assigned.length}개사를 담당 중입니다. 삭제하면 해당 기업의 담당자가 초기화됩니다. 계속하시겠습니까?`)) return;
-    for (const c of assigned) await dealsRef.doc(c.id).update({managerId: null});
-  } else {
-    if (!confirm(`${name}님을 삭제하시겠습니까?`)) return;
-  }
-  await managersRef.doc(id).delete();
-}
-
-// ─── Export / Import ───
-function exportJSON() {
-  const data = {
-    managers: managers.map(m => ({id:m.id, name:m.name, role:m.role||''})),
-    companies: companies.map(c => { const {id,...rest} = c; return {id:c.id, ...rest}; })
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'investment_pipeline_' + new Date().toISOString().slice(0,10) + '.json';
+// === Export / Import ===
+function exportJSON(){
+  const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;})};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
 }
 
-async function importJSON(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const text = await file.text();
-  try {
-    const data = JSON.parse(text);
-    if (!data.companies || !Array.isArray(data.companies)) { alert('올바른 JSON 형식이 아닙니다.'); return; }
-    const hasManagers = data.managers && Array.isArray(data.managers);
-    const msg = hasManagers
-      ? `담당자 ${data.managers.length}명, 기업 ${data.companies.length}개사를 가져옵니다.\n기존 데이터는 삭제됩니다. 계속?`
-      : `${data.companies.length}개 기업 데이터를 가져옵니다.\n기존 데이터는 삭제됩니다. 계속?`;
-    if (!confirm(msg)) return;
-
-    // delete all existing
-    const existDeals = await dealsRef.get();
-    for (const doc of existDeals.docs) await doc.ref.delete();
-
-    let idMap = {};
-    if (hasManagers) {
-      const existMgrs = await managersRef.get();
-      for (const doc of existMgrs.docs) await doc.ref.delete();
-      for (const m of data.managers) {
-        const oldId = m.id;
-        const newDoc = await managersRef.add({name: m.name, role: m.role||''});
-        idMap[oldId] = newDoc.id;
-      }
-    }
-
-    for (const c of data.companies) {
-      const {id, ...rest} = c;
-      if (hasManagers && rest.managerId && idMap[rest.managerId]) {
-        rest.managerId = idMap[rest.managerId];
-      } else if (hasManagers && rest.managerId) {
-        rest.managerId = null;
-      }
+async function importJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  const text=await file.text();
+  try{
+    const data=JSON.parse(text);
+    if(!data.companies||!Array.isArray(data.companies)){alert('올바른 JSON 형식이 아닙니다.');return;}
+    if(!confirm(data.companies.length+'개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다. 계속하시겠습니까?'))return;
+    const existing=await dealsRef.get();
+    const batch=db.batch();
+    existing.forEach(doc=>batch.delete(doc.ref));
+    await batch.commit();
+    for(const c of data.companies){
+      const{id,...rest}=c;
       await dealsRef.add(rest);
     }
     alert('가져오기 완료!');
-  } catch (err) { alert('JSON 오류: ' + err.message); }
-  e.target.value = '';
+  }catch(err){alert('JSON 파싱 오류: '+err.message);}
+  e.target.value='';
 }
 </script>
 </body>
