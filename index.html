@@ -26,6 +26,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .summary-card .label{font-size:0.75rem;color:#999;margin-bottom:4px;}
 .summary-card .value{font-size:1.8rem;font-weight:700;}
 .summary-card .sub{font-size:0.72rem;color:#aaa;margin-top:2px;}
+.fund-breakdown{margin-top:10px;border-top:1px solid #f0f0f0;padding-top:8px;}
+.fund-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:0.75rem;}
+.fund-row .fund-name{color:#666;font-weight:500;}
+.fund-row .fund-amt{font-weight:700;color:#1a1a1a;}
+.fund-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:0.65rem;font-weight:600;margin-right:4px;}
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .section-title{font-size:1rem;font-weight:700;}
 .section-hint{font-size:0.75rem;color:#bbb;}
@@ -46,7 +51,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .seg-done{background:#4ade80;}
 .seg-current{background:#3b82f6;}
 .seg-future{background:#e0e0e0;}
-.kanban-card .kc-mgr .mgr-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:600;}
+.kanban-card .kc-bottom{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.kanban-card .kc-bottom .mgr-badge,.kanban-card .kc-bottom .fund-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:600;}
 .milestone-table{width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;}
 .milestone-table thead{background:#fafafa;}
 .milestone-table th{padding:12px 10px;font-size:0.75rem;color:#999;font-weight:500;text-align:left;border-bottom:1px solid #eee;}
@@ -71,10 +77,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .modal-overlay.active{display:flex;}
 .modal{background:#fff;border-radius:16px;padding:28px;width:90vw;max-width:90vw;max-height:88vh;overflow-y:auto;}
 .modal h2{font-size:1.15rem;margin-bottom:20px;font-weight:700;}
-.detail-meta{display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:0.85rem;margin-bottom:20px;}
-.detail-meta .dm-item{min-width:60px;}
-.detail-meta .dm-label{color:#999;font-size:0.72rem;display:block;}
-.detail-meta .dm-value{font-weight:600;margin-top:2px;}
 .detail-section{margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0;}
 .detail-section h3{font-size:0.9rem;font-weight:600;margin-bottom:10px;color:#555;}
 .history-timeline{position:relative;padding-left:20px;}
@@ -101,22 +103,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .form-group input:focus,.form-group select:focus{border-color:#1a1a1a;}
 .form-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-/* Manager modal */
-.mgr-list{list-style:none;margin-bottom:16px;}
-.mgr-list li{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;}
-.mgr-list li:last-child{border-bottom:none;}
-.mgr-list .mgr-badge-lg{display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.82rem;font-weight:600;}
-.mgr-list .mgr-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem;padding:4px 8px;}
-.mgr-list .mgr-del:hover{color:#d32f2f;}
-.mgr-add-row{display:flex;gap:8px;align-items:center;}
-.mgr-add-row input,.mgr-add-row select{padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;}
-.mgr-add-row input{flex:1;}
-.mgr-empty{text-align:center;color:#999;font-size:0.85rem;padding:16px 0;}
-.color-opt{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.mgr-list,.fund-list-ul{list-style:none;margin-bottom:16px;}
+.mgr-list li,.fund-list-ul li{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;}
+.mgr-list li:last-child,.fund-list-ul li:last-child{border-bottom:none;}
+.mgr-badge-lg,.fund-badge-lg{display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.82rem;font-weight:600;}
+.mgr-del,.fund-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem;padding:4px 8px;}
+.mgr-del:hover,.fund-del:hover{color:#d32f2f;}
+.mgr-add-row,.fund-add-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.mgr-add-row input,.mgr-add-row select,.fund-add-row input,.fund-add-row select{padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;}
+.mgr-add-row input,.fund-add-row input{flex:1;min-width:120px;}
+.fund-add-row .fund-short{width:80px;flex:none;}
+.mgr-empty,.fund-empty{text-align:center;color:#999;font-size:0.85rem;padding:16px 0;}
 @media(max-width:768px){
 .summary-grid{grid-template-columns:1fr 1fr;}
 .kanban{grid-template-columns:1fr;gap:8px;}
-.form-row{grid-template-columns:1fr;}
+.form-row,.form-row-3{grid-template-columns:1fr;}
 .top-bar{flex-direction:column;}
 }
 </style>
@@ -130,6 +132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
     </div>
     <div class="top-right">
+      <button class="btn" onclick="openFundModal()">조합 관리</button>
       <button class="btn" onclick="openMgrModal()">담당자 관리</button>
       <button class="btn" onclick="exportJSON()">내보내기</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
@@ -139,7 +142,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   </div>
   <div class="summary-grid">
     <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
-    <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div></div>
+    <div class="summary-card">
+      <div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div>
+      <div class="fund-breakdown" id="fundBreakdown"></div>
+    </div>
     <div class="summary-card"><div class="label">가장 임박한 일정</div><div class="value" id="sumNearest">-</div><div class="sub" id="sumNearestSub"></div></div>
     <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
   </div>
@@ -147,7 +153,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   <div class="kanban" id="kanbanBoard"></div>
   <div class="section-header"><div class="section-title">다음 마일스톤 (임박순)</div></div>
   <table class="milestone-table">
-    <thead><tr><th>기업명</th><th>섹터</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
+    <thead><tr><th>기업명</th><th>섹터</th><th>조합</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
     <tbody id="milestoneBody"></tbody>
   </table>
   <div class="footer-note">데이터는 Firebase에 실시간 저장됩니다. 모든 기기에서 동일한 데이터가 표시됩니다.</div>
@@ -155,12 +161,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 
 <!-- Add Modal -->
 <div class="modal-overlay" id="addModal">
-<div class="modal" style="max-width:520px;">
+<div class="modal" style="max-width:560px;">
   <h2>기업 추가</h2>
   <div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div>
-  <div class="form-row">
+  <div class="form-row-3">
     <div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div>
     <div class="form-group"><label>담당자</label><select id="aManager"></select></div>
+    <div class="form-group"><label>조합</label><select id="aFund"></select></div>
   </div>
   <div class="form-row">
     <div class="form-group"><label>투자금액 (억)</label><input id="aAmount" type="number" placeholder="30"></div>
@@ -192,16 +199,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   <div class="mgr-add-row">
     <input id="mgrNewName" placeholder="이름">
     <select id="mgrNewColor">
-      <option value="#2e7d32" style="color:#2e7d32;">● 초록</option>
-      <option value="#1565c0" style="color:#1565c0;">● 파랑</option>
-      <option value="#e65100" style="color:#e65100;">● 주황</option>
-      <option value="#7b1fa2" style="color:#7b1fa2;">● 보라</option>
-      <option value="#c62828" style="color:#c62828;">● 빨강</option>
-      <option value="#00695c" style="color:#00695c;">● 청록</option>
+      <option value="#2e7d32">● 초록</option>
+      <option value="#1565c0">● 파랑</option>
+      <option value="#e65100">● 주황</option>
+      <option value="#7b1fa2">● 보라</option>
+      <option value="#c62828">● 빨강</option>
+      <option value="#00695c">● 청록</option>
     </select>
     <button class="btn btn-sm btn-primary" onclick="addManager()">등록</button>
   </div>
   <div class="form-actions" style="margin-top:20px;"><button class="btn" onclick="closeMgrModal()">닫기</button></div>
+</div>
+</div>
+
+<!-- Fund Modal -->
+<div class="modal-overlay" id="fundModal">
+<div class="modal" style="max-width:520px;">
+  <h2>조합 관리</h2>
+  <div id="fundListArea"></div>
+  <div class="fund-add-row">
+    <input id="fundNewName" placeholder="조합 정식명칭">
+    <input id="fundNewShort" class="fund-short" placeholder="약칭">
+    <select id="fundNewColor">
+      <option value="#1565c0">● 파랑</option>
+      <option value="#2e7d32">● 초록</option>
+      <option value="#e65100">● 주황</option>
+      <option value="#7b1fa2">● 보라</option>
+      <option value="#c62828">● 빨강</option>
+      <option value="#00695c">● 청록</option>
+    </select>
+    <button class="btn btn-sm btn-primary" onclick="addFund()">등록</button>
+  </div>
+  <div class="form-actions" style="margin-top:20px;"><button class="btn" onclick="closeFundModal()">닫기</button></div>
 </div>
 </div>
 
@@ -219,68 +248,52 @@ firebase.initializeApp({
 const db=firebase.firestore();
 const dealsRef=db.collection('deals');
 const mgrsRef=db.collection('managers');
+const fundsRef=db.collection('funds');
 
 const STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약',s5:'투자금 납입'};
 const STAGE_KEYS=['s1','s2','s3','s4','s5'];
 const COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
-let companies=[];
-let managers=[];
+let companies=[],managers=[],funds=[];
 
 document.getElementById('todayDate').textContent='오늘: '+new Date().toISOString().slice(0,10);
 document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
 
-// Real-time listeners
-dealsRef.orderBy('name').onSnapshot(snap=>{
-  companies=[];snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));renderAll();
-});
-mgrsRef.orderBy('name').onSnapshot(snap=>{
-  managers=[];snap.forEach(doc=>managers.push({id:doc.id,...doc.data()}));
-  renderMgrList();refreshMgrSelects();renderAll();
-});
+dealsRef.orderBy('name').onSnapshot(snap=>{companies=[];snap.forEach(doc=>companies.push({id:doc.id,...doc.data()}));renderAll();});
+mgrsRef.orderBy('name').onSnapshot(snap=>{managers=[];snap.forEach(doc=>managers.push({id:doc.id,...doc.data()}));renderMgrList();refreshSelects();renderAll();});
+fundsRef.orderBy('name').onSnapshot(snap=>{funds=[];snap.forEach(doc=>funds.push({id:doc.id,...doc.data()}));renderFundList();refreshSelects();renderAll();});
 
 function renderAll(){renderSummary();renderKanban();renderMilestones();}
 
-function getCurrentStage(c){
-  if(!c.history||c.history.length===0)return{stage:'s1',date:''};
-  return c.history[c.history.length-1];
-}
+function getCurrentStage(c){if(!c.history||c.history.length===0)return{stage:'s1',date:''};return c.history[c.history.length-1];}
 function getStageIndex(s){return STAGE_KEYS.indexOf(s);}
-function getDday(dateStr){
-  if(!dateStr)return null;
-  const today=new Date();today.setHours(0,0,0,0);
-  const target=new Date(dateStr);target.setHours(0,0,0,0);
-  return Math.ceil((target-today)/(1000*60*60*24));
-}
-function getMgrInfo(name){
-  const m=managers.find(x=>x.name===name);
-  if(m)return{bg:COLOR_BG[m.color]||'#f5f5f5',fg:m.color||'#999'};
-  return{bg:'#f5f5f5',fg:'#999'};
-}
-function mgrBadgeHtml(name,size){
-  if(!name)return'';
-  const m=getMgrInfo(name);
-  const fs=size==='sm'?'0.68rem':'0.78rem';
-  const pd=size==='sm'?'2px 8px':'3px 10px';
-  return`<span style="background:${m.bg};color:${m.fg};padding:${pd};border-radius:10px;font-size:${fs};font-weight:600;">${name}</span>`;
-}
+function getDday(ds){if(!ds)return null;const t=new Date();t.setHours(0,0,0,0);const d=new Date(ds);d.setHours(0,0,0,0);return Math.ceil((d-t)/864e5);}
+function getBg(color){return COLOR_BG[color]||'#f5f5f5';}
+function getMgrInfo(name){const m=managers.find(x=>x.name===name);return m?{bg:getBg(m.color),fg:m.color}:{bg:'#f5f5f5',fg:'#999'};}
+function getFundInfo(name){const f=funds.find(x=>x.name===name);return f?{bg:getBg(f.color),fg:f.color,short:f.short}:{bg:'#f5f5f5',fg:'#999',short:name};}
 
-// Manager selects
-function refreshMgrSelects(){
-  const selects=document.querySelectorAll('.mgr-select');
-  selects.forEach(sel=>{
-    const cur=sel.value;
-    sel.innerHTML='<option value="">(담당자 미지정)</option>';
-    managers.forEach(m=>{sel.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});
-    sel.value=cur;
+function badgeHtml(name,info,size){
+  if(!name)return'';
+  const fs=size==='sm'?'0.68rem':'0.78rem';const pd=size==='sm'?'2px 8px':'3px 10px';
+  return`<span style="background:${info.bg};color:${info.fg};padding:${pd};border-radius:10px;font-size:${fs};font-weight:600;">${info.short||name}</span>`;
+}
+function mgrBadge(name,size){return badgeHtml(name,getMgrInfo(name),size);}
+function fundBadge(name,size){const i=getFundInfo(name);return badgeHtml(i.short||name,i,size);}
+
+function refreshSelects(){
+  // Manager selects
+  document.querySelectorAll('.mgr-select').forEach(sel=>{
+    const cur=sel.value;sel.innerHTML='<option value="">(담당자 미지정)</option>';
+    managers.forEach(m=>{sel.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});sel.value=cur;
   });
-  // Also update the add modal select
-  const addSel=document.getElementById('aManager');
-  if(addSel){
-    const cur=addSel.value;
-    addSel.innerHTML='<option value="">(담당자 미지정)</option>';
-    managers.forEach(m=>{addSel.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});
-    addSel.value=cur;
-  }
+  const addMgr=document.getElementById('aManager');
+  if(addMgr){const cur=addMgr.value;addMgr.innerHTML='<option value="">(담당자 미지정)</option>';managers.forEach(m=>{addMgr.innerHTML+=`<option value="${m.name}">${m.name}</option>`;});addMgr.value=cur;}
+  // Fund selects
+  document.querySelectorAll('.fund-select').forEach(sel=>{
+    const cur=sel.value;sel.innerHTML='<option value="">(조합 미지정)</option>';
+    funds.forEach(f=>{sel.innerHTML+=`<option value="${f.name}">${f.short} (${f.name})</option>`;});sel.value=cur;
+  });
+  const addFund=document.getElementById('aFund');
+  if(addFund){const cur=addFund.value;addFund.innerHTML='<option value="">(조합 미지정)</option>';funds.forEach(f=>{addFund.innerHTML+=`<option value="${f.name}">${f.short} (${f.name})</option>`;});addFund.value=cur;}
 }
 
 function renderSummary(){
@@ -288,20 +301,28 @@ function renderSummary(){
   const totalAmt=companies.reduce((s,c)=>s+(c.amount||0),0);
   document.getElementById('sumAmount').textContent=totalAmt+'억';
   document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
+
+  // Fund breakdown
+  const fbEl=document.getElementById('fundBreakdown');
+  if(funds.length>0){
+    let fbHtml='';
+    funds.forEach(f=>{
+      const amt=companies.filter(c=>c.fund===f.name).reduce((s,c)=>s+(c.amount||0),0);
+      fbHtml+=`<div class="fund-row"><span class="fund-name"><span class="fund-badge" style="background:${getBg(f.color)};color:${f.color};">${f.short}</span></span><span class="fund-amt">${amt}억</span></div>`;
+    });
+    const unassigned=companies.filter(c=>!c.fund).reduce((s,c)=>s+(c.amount||0),0);
+    if(unassigned>0)fbHtml+=`<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">${unassigned}억</span></div>`;
+    fbEl.innerHTML=fbHtml;
+  }else{fbEl.innerHTML='';}
+
   let nearest=null,nearestComp=null;
-  companies.forEach(c=>{
-    if(c.plannedNext&&c.plannedNext.date){
-      const d=getDday(c.plannedNext.date);
-      if(d!==null&&d>=0&&(nearest===null||d<nearest)){nearest=d;nearestComp=c;}
-    }
-  });
+  companies.forEach(c=>{if(c.plannedNext&&c.plannedNext.date){const d=getDday(c.plannedNext.date);if(d!==null&&d>=0&&(nearest===null||d<nearest)){nearest=d;nearestComp=c;}}});
   if(nearestComp&&nearestComp.plannedNext){
     document.getElementById('sumNearest').textContent=(nearestComp.plannedNext.date||'').slice(5).replace('-','/');
     document.getElementById('sumNearestSub').textContent=nearestComp.name+' · '+STAGES[nearestComp.plannedNext.stage||'s5'];
   }else{document.getElementById('sumNearest').textContent='-';document.getElementById('sumNearestSub').textContent='';}
   const doneComps=companies.filter(c=>getCurrentStage(c).stage==='s5');
-  const doneAmt=doneComps.reduce((s,c)=>s+(c.amount||0),0);
-  document.getElementById('sumDone').textContent=doneAmt+'억';
+  document.getElementById('sumDone').textContent=doneComps.reduce((s,c)=>s+(c.amount||0),0)+'억';
   document.getElementById('sumDoneSub').textContent=doneComps.length+'개사';
 }
 
@@ -316,13 +337,11 @@ function renderKanban(){
     list.forEach(c=>{
       const cur=getCurrentStage(c);const curIdx=getStageIndex(cur.stage);
       const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
-      let bar='<div class="kc-bar">';
-      for(let i=0;i<5;i++){if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;else bar+=`<div class="seg seg-future"></div>`;}
-      bar+='</div>';
+      let bar='<div class="kc-bar">';for(let i=0;i<5;i++){if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;else bar+=`<div class="seg seg-future"></div>`;}bar+='</div>';
       html+=`<div class="kanban-card" onclick="openDetail('${c.id}')">
         <div class="kc-name">${c.name}</div><div class="kc-sector">${c.sector||''}</div>
-        <div class="kc-amount">${c.amount||0}억</div><div class="kc-date">진입: ${entryDate}</div>
-        ${bar}<div class="kc-mgr">${mgrBadgeHtml(c.manager,'sm')}</div></div>`;
+        <div class="kc-amount">${c.amount||0}억</div><div class="kc-date">진입: ${entryDate}</div>${bar}
+        <div class="kc-bottom">${c.fund?fundBadge(c.fund,'sm'):''}${c.manager?mgrBadge(c.manager,'sm'):''}</div></div>`;
     });
     html+=`</div></div>`;
   });
@@ -333,50 +352,33 @@ function renderMilestones(){
   const el=document.getElementById('milestoneBody');
   const sorted=[...companies].sort((a,b)=>{
     const da=a.plannedNext&&a.plannedNext.date?new Date(a.plannedNext.date):new Date('2099-12-31');
-    const db2=b.plannedNext&&b.plannedNext.date?new Date(b.plannedNext.date):new Date('2099-12-31');
-    return da-db2;
+    const db2=b.plannedNext&&b.plannedNext.date?new Date(b.plannedNext.date):new Date('2099-12-31');return da-db2;
   });
   let html='';
   sorted.forEach(c=>{
     const cur=getCurrentStage(c);const curIdx=getStageIndex(cur.stage);
-    const nextLabel=c.plannedNext&&c.plannedNext.stage?STAGES[c.plannedNext.stage]:'미정';
-    const nextDate=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
+    const nl=c.plannedNext&&c.plannedNext.stage?STAGES[c.plannedNext.stage]:'미정';
+    const nd=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
     const dday=c.plannedNext&&c.plannedNext.date?getDday(c.plannedNext.date):null;
-    let ddayHtml='';
-    if(dday===null)ddayHtml='<span class="dday-badge dday-none">미정</span>';
-    else if(dday<0)ddayHtml=`<span class="dday-badge dday-urgent">D+${Math.abs(dday)}</span>`;
-    else if(dday<=7)ddayHtml=`<span class="dday-badge dday-urgent">D-${dday}</span>`;
-    else ddayHtml=`<span class="dday-badge dday-normal">D-${dday}</span>`;
-    let dots='<div class="progress-dots">';
-    for(let i=0;i<5;i++)dots+=`<span class="${i<=curIdx?'active':''}"></span>`;
-    dots+='</div>';
-    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${c.manager?mgrBadgeHtml(c.manager,'sm'):'<span style="color:#ccc;">-</span>'}</td><td><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
+    let ddH='';if(dday===null)ddH='<span class="dday-badge dday-none">미정</span>';else if(dday<0)ddH=`<span class="dday-badge dday-urgent">D+${Math.abs(dday)}</span>`;else if(dday<=7)ddH=`<span class="dday-badge dday-urgent">D-${dday}</span>`;else ddH=`<span class="dday-badge dday-normal">D-${dday}</span>`;
+    let dots='<div class="progress-dots">';for(let i=0;i<5;i++)dots+=`<span class="${i<=curIdx?'active':''}"></span>`;dots+='</div>';
+    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${c.fund?fundBadge(c.fund,'sm'):'<span style="color:#ccc;">-</span>'}</td><td>${c.manager?mgrBadge(c.manager,'sm'):'<span style="color:#ccc;">-</span>'}</td><td><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]}</span></td><td>${c.amount||0}억</td><td>${nl} · ${nd}</td><td>${ddH}</td><td>${dots}</td></tr>`;
   });
   el.innerHTML=html;
 }
 
 // === Add Modal ===
 function openAddModal(){
-  document.getElementById('aName').value='';document.getElementById('aSector').value='';
-  document.getElementById('aManager').value='';document.getElementById('aAmount').value='';
-  document.getElementById('aStage').value='s1';
+  ['aName','aSector','aNote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('aManager').value='';document.getElementById('aFund').value='';
+  document.getElementById('aAmount').value='';document.getElementById('aStage').value='s1';
   document.getElementById('aDate').value=new Date().toISOString().slice(0,10);
-  document.getElementById('aNote').value='';
-  refreshMgrSelects();
-  document.getElementById('addModal').classList.add('active');
+  refreshSelects();document.getElementById('addModal').classList.add('active');
 }
 function closeAddModal(){document.getElementById('addModal').classList.remove('active');}
 async function saveNewDeal(){
-  const name=document.getElementById('aName').value.trim();
-  if(!name){alert('회사명을 입력하세요');return;}
-  await dealsRef.add({
-    name,sector:document.getElementById('aSector').value.trim(),
-    manager:document.getElementById('aManager').value,
-    amount:parseInt(document.getElementById('aAmount').value)||0,
-    history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],
-    plannedNext:{stage:null,date:null},
-    note:document.getElementById('aNote').value.trim()
-  });
+  const name=document.getElementById('aName').value.trim();if(!name){alert('회사명을 입력하세요');return;}
+  await dealsRef.add({name,sector:document.getElementById('aSector').value.trim(),manager:document.getElementById('aManager').value,fund:document.getElementById('aFund').value,amount:parseInt(document.getElementById('aAmount').value)||0,history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],plannedNext:{stage:null,date:null},note:document.getElementById('aNote').value.trim()});
   closeAddModal();
 }
 
@@ -385,123 +387,81 @@ function openDetail(id){
   const c=companies.find(x=>x.id===id);if(!c)return;
   const cur=getCurrentStage(c);
   let html=`<h2>${c.name}</h2>
-  <div class="form-row" style="margin-bottom:16px;">
+  <div class="form-row-3" style="margin-bottom:16px;">
     <div class="form-group"><label>기업명</label><input id="dName" value="${c.name||''}"></div>
     <div class="form-group"><label>섹터</label><input id="dSector" value="${c.sector||''}"></div>
-  </div>
-  <div class="form-row" style="margin-bottom:16px;">
-    <div class="form-group"><label>담당자</label><select id="dManager" class="mgr-select"><option value="">(담당자 미지정)</option>${managers.map(m=>`<option value="${m.name}" ${c.manager===m.name?'selected':''}>${m.name}</option>`).join('')}</select></div>
     <div class="form-group"><label>투자금액(억)</label><input id="dAmount" type="number" value="${c.amount||0}"></div>
   </div>
-  <div class="form-group" style="margin-bottom:16px;"><label>비고</label><input id="dNote" value="${c.note||''}"></div>`;
-
+  <div class="form-row-3" style="margin-bottom:16px;">
+    <div class="form-group"><label>담당자</label><select id="dManager" class="mgr-select"><option value="">(담당자 미지정)</option>${managers.map(m=>`<option value="${m.name}" ${c.manager===m.name?'selected':''}>${m.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>조합</label><select id="dFund" class="fund-select"><option value="">(조합 미지정)</option>${funds.map(f=>`<option value="${f.name}" ${c.fund===f.name?'selected':''}>${f.short} (${f.name})</option>`).join('')}</select></div>
+    <div class="form-group"><label>비고</label><input id="dNote" value="${c.note||''}"></div>
+  </div>`;
   // History
   html+=`<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">`;
-  if(c.history&&c.history.length>0){
-    c.history.forEach((h,i)=>{
-      html+=`<div class="history-item"><span class="h-date">${h.date||''}</span><span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span><span style="font-size:0.72rem;color:#bbb;">${h.date?h.date:''}</span><button class="h-del" onclick="event.stopPropagation();deleteHistory('${c.id}',${i})">✕</button></div>`;
-    });
-  }
-  html+=`</div><div class="add-history-row">
-    <select id="newHistStage">${STAGE_KEYS.map(sk=>`<option value="${sk}">${STAGES[sk]}</option>`).join('')}</select>
-    <input type="date" id="newHistDate" value="${new Date().toISOString().slice(0,10)}">
-    <button class="btn btn-sm btn-primary" onclick="addHistory('${c.id}')">+ 단계 기록</button>
-  </div></div>`;
-
-  // Next stage
-  html+=`<div class="detail-section"><h3>다음 예상 단계</h3>
-    <div class="next-stage-row">
-      <div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}</select></div>
-      <div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="${c.plannedNext&&c.plannedNext.date?c.plannedNext.date:''}"></div>
-    </div><div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div></div>`;
-
-  // Actions
+  if(c.history&&c.history.length>0){c.history.forEach((h,i)=>{html+=`<div class="history-item"><span class="h-date">${h.date||''}</span><span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span><button class="h-del" onclick="event.stopPropagation();deleteHistory('${c.id}',${i})">✕</button></div>`;});}
+  html+=`</div><div class="add-history-row"><select id="newHistStage">${STAGE_KEYS.map(sk=>`<option value="${sk}">${STAGES[sk]}</option>`).join('')}</select><input type="date" id="newHistDate" value="${new Date().toISOString().slice(0,10)}"><button class="btn btn-sm btn-primary" onclick="addHistory('${c.id}')">+ 단계 기록</button></div></div>`;
+  // Next
+  html+=`<div class="detail-section"><h3>다음 예상 단계</h3><div class="next-stage-row"><div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}</select></div><div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="${c.plannedNext&&c.plannedNext.date?c.plannedNext.date:''}"></div></div><div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div></div>`;
   html+=`<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button></div></div>`;
-
   document.getElementById('detailModalContent').innerHTML=html;
   document.getElementById('detailModal').classList.add('active');
 }
 function closeDetailModal(){document.getElementById('detailModal').classList.remove('active');}
-
-async function addHistory(id){
-  const c=companies.find(x=>x.id===id);if(!c)return;
-  const history=c.history?[...c.history]:[];
-  history.push({stage:document.getElementById('newHistStage').value,date:document.getElementById('newHistDate').value});
-  await dealsRef.doc(id).update({history});
-  setTimeout(()=>openDetail(id),300);
-}
-async function deleteHistory(id,index){
-  const c=companies.find(x=>x.id===id);if(!c)return;
-  if(c.history.length<=1){alert('최소 1개의 이력이 필요합니다.');return;}
-  const history=[...c.history];history.splice(index,1);
-  await dealsRef.doc(id).update({history});
-  setTimeout(()=>openDetail(id),300);
-}
+async function addHistory(id){const c=companies.find(x=>x.id===id);if(!c)return;const h=c.history?[...c.history]:[];h.push({stage:document.getElementById('newHistStage').value,date:document.getElementById('newHistDate').value});await dealsRef.doc(id).update({history:h});setTimeout(()=>openDetail(id),300);}
+async function deleteHistory(id,idx){const c=companies.find(x=>x.id===id);if(!c)return;if(c.history.length<=1){alert('최소 1개의 이력이 필요합니다.');return;}const h=[...c.history];h.splice(idx,1);await dealsRef.doc(id).update({history:h});setTimeout(()=>openDetail(id),300);}
 async function saveDetail(id){
-  await dealsRef.doc(id).update({
-    name:document.getElementById('dName').value.trim(),
-    sector:document.getElementById('dSector').value.trim(),
-    manager:document.getElementById('dManager').value,
-    amount:parseInt(document.getElementById('dAmount').value)||0,
-    note:document.getElementById('dNote').value.trim(),
-    plannedNext:{stage:document.getElementById('nextStageSelect').value||null,date:document.getElementById('nextStageDate').value||null}
-  });
+  await dealsRef.doc(id).update({name:document.getElementById('dName').value.trim(),sector:document.getElementById('dSector').value.trim(),manager:document.getElementById('dManager').value,fund:document.getElementById('dFund').value,amount:parseInt(document.getElementById('dAmount').value)||0,note:document.getElementById('dNote').value.trim(),plannedNext:{stage:document.getElementById('nextStageSelect').value||null,date:document.getElementById('nextStageDate').value||null}});
   closeDetailModal();
 }
-async function deleteDeal(id){
-  const c=companies.find(x=>x.id===id);if(!c)return;
-  if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){await dealsRef.doc(id).delete();closeDetailModal();}
-}
+async function deleteDeal(id){const c=companies.find(x=>x.id===id);if(!c)return;if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){await dealsRef.doc(id).delete();closeDetailModal();}}
 
 // === Manager Modal ===
-function openMgrModal(){document.getElementById('mgrModal').classList.add('active');renderMgrList();}
+function openMgrModal(){document.getElementById('mgrModal').classList.add('active');}
 function closeMgrModal(){document.getElementById('mgrModal').classList.remove('active');}
 function renderMgrList(){
   const el=document.getElementById('mgrListArea');
-  if(managers.length===0){el.innerHTML='<div class="mgr-empty">등록된 담당자가 없습니다.<br>아래에서 담당자를 추가하세요.</div>';return;}
-  let html='<ul class="mgr-list">';
-  managers.forEach(m=>{
-    const bg=COLOR_BG[m.color]||'#f5f5f5';
-    html+=`<li><span class="mgr-badge-lg" style="background:${bg};color:${m.color};">${m.name}</span><button class="mgr-del" onclick="deleteManager('${m.id}')">✕</button></li>`;
-  });
-  html+='</ul>';
-  el.innerHTML=html;
+  if(managers.length===0){el.innerHTML='<div class="mgr-empty">등록된 담당자가 없습니다.<br>아래에서 추가하세요.</div>';return;}
+  let html='<ul class="mgr-list">';managers.forEach(m=>{html+=`<li><span class="mgr-badge-lg" style="background:${getBg(m.color)};color:${m.color};">${m.name}</span><button class="mgr-del" onclick="deleteManager('${m.id}')">✕</button></li>`;});html+='</ul>';el.innerHTML=html;
 }
-async function addManager(){
-  const name=document.getElementById('mgrNewName').value.trim();
-  if(!name){alert('이름을 입력하세요');return;}
-  if(managers.find(m=>m.name===name)){alert('이미 등록된 담당자입니다.');return;}
-  const color=document.getElementById('mgrNewColor').value;
-  await mgrsRef.add({name,color});
-  document.getElementById('mgrNewName').value='';
+async function addManager(){const n=document.getElementById('mgrNewName').value.trim();if(!n){alert('이름을 입력하세요');return;}if(managers.find(m=>m.name===n)){alert('이미 등록됨');return;}await mgrsRef.add({name:n,color:document.getElementById('mgrNewColor').value});document.getElementById('mgrNewName').value='';}
+async function deleteManager(id){const m=managers.find(x=>x.id===id);if(m&&confirm(m.name+' 삭제?'))await mgrsRef.doc(id).delete();}
+
+// === Fund Modal ===
+function openFundModal(){document.getElementById('fundModal').classList.add('active');}
+function closeFundModal(){document.getElementById('fundModal').classList.remove('active');}
+function renderFundList(){
+  const el=document.getElementById('fundListArea');
+  if(funds.length===0){el.innerHTML='<div class="fund-empty">등록된 조합이 없습니다.<br>아래에서 추가하세요.</div>';return;}
+  let html='<ul class="fund-list-ul">';funds.forEach(f=>{html+=`<li><div><span class="fund-badge-lg" style="background:${getBg(f.color)};color:${f.color};">${f.short}</span> <span style="font-size:0.78rem;color:#888;margin-left:4px;">${f.name}</span></div><button class="fund-del" onclick="deleteFund('${f.id}')">✕</button></li>`;});html+='</ul>';el.innerHTML=html;
 }
-async function deleteManager(id){
-  const m=managers.find(x=>x.id===id);
-  if(m&&confirm(m.name+' 담당자를 삭제하시겠습니까?')){await mgrsRef.doc(id).delete();}
+async function addFund(){
+  const name=document.getElementById('fundNewName').value.trim();
+  const short=document.getElementById('fundNewShort').value.trim();
+  if(!name||!short){alert('정식명칭과 약칭을 모두 입력하세요');return;}
+  if(funds.find(f=>f.name===name)){alert('이미 등록됨');return;}
+  await fundsRef.add({name,short,color:document.getElementById('fundNewColor').value});
+  document.getElementById('fundNewName').value='';document.getElementById('fundNewShort').value='';
 }
+async function deleteFund(id){const f=funds.find(x=>x.id===id);if(f&&confirm(f.short+' 조합을 삭제?'))await fundsRef.doc(id).delete();}
 
 // === Export / Import ===
 function exportJSON(){
-  const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;}),managers:managers.map(m=>{const{id,...rest}=m;return rest;})};
+  const data={companies:companies.map(c=>{const{id,...r}=c;return r;}),managers:managers.map(m=>{const{id,...r}=m;return r;}),funds:funds.map(f=>{const{id,...r}=f;return r;})};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
 async function importJSON(e){
-  const file=e.target.files[0];if(!file)return;
-  const text=await file.text();
+  const file=e.target.files[0];if(!file)return;const text=await file.text();
   try{
-    const data=JSON.parse(text);
-    if(!data.companies||!Array.isArray(data.companies)){alert('올바른 JSON 형식이 아닙니다.');return;}
-    if(!confirm(data.companies.length+'개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다. 계속하시겠습니까?'))return;
-    const ex1=await dealsRef.get();const b1=db.batch();ex1.forEach(doc=>b1.delete(doc.ref));await b1.commit();
-    for(const c of data.companies){const{id,...rest}=c;await dealsRef.add(rest);}
-    if(data.managers&&Array.isArray(data.managers)){
-      const ex2=await mgrsRef.get();const b2=db.batch();ex2.forEach(doc=>b2.delete(doc.ref));await b2.commit();
-      for(const m of data.managers){const{id,...rest}=m;await mgrsRef.add(rest);}
-    }
+    const data=JSON.parse(text);if(!data.companies){alert('올바른 형식이 아닙니다.');return;}
+    if(!confirm(data.companies.length+'개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다.'))return;
+    let ex=await dealsRef.get();let b=db.batch();ex.forEach(d=>b.delete(d.ref));await b.commit();
+    for(const c of data.companies){const{id,...r}=c;await dealsRef.add(r);}
+    if(data.managers){ex=await mgrsRef.get();b=db.batch();ex.forEach(d=>b.delete(d.ref));await b.commit();for(const m of data.managers){const{id,...r}=m;await mgrsRef.add(r);}}
+    if(data.funds){ex=await fundsRef.get();b=db.batch();ex.forEach(d=>b.delete(d.ref));await b.commit();for(const f of data.funds){const{id,...r}=f;await fundsRef.add(r);}}
     alert('가져오기 완료!');
-  }catch(err){alert('JSON 파싱 오류: '+err.message);}
+  }catch(err){alert('오류: '+err.message);}
   e.target.value='';
 }
 </script>
