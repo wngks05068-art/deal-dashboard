@@ -8,33 +8,51 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f5f5f0;color:#1a1a1a;line-height:1.6;}
 .container{max-width:96vw;width:100%;margin:0 auto;padding:20px 2vw 40px;}
-h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
-.subtitle{font-size:0.85rem;color:#888;margin-bottom:16px;}
-.meta-row{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:#999;margin-bottom:18px;}
+.top-bar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
+.top-left h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
+.top-left .subtitle{font-size:0.82rem;color:#888;}
+.top-left .meta-row{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#999;margin-top:6px;}
 .meta-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;}
-.btn-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.btn{padding:8px 16px;border-radius:20px;border:1.5px solid #ddd;background:#fff;font-size:0.85rem;cursor:pointer;font-weight:500;transition:all .2s;}
+.top-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{padding:8px 16px;border-radius:20px;border:1.5px solid #ddd;background:#fff;font-size:0.82rem;cursor:pointer;font-weight:500;transition:all .2s;}
 .btn:hover{background:#f0f0f0;}
 .btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
 .btn-primary:hover{background:#333;}
 .btn-danger{color:#d32f2f;border-color:#d32f2f;background:#fff;}
 .btn-danger:hover{background:#fef0f0;}
 .btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:14px;}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:28px;}
 .summary-card{background:#fff;border-radius:14px;padding:18px 16px;border:1px solid #eee;}
 .summary-card .label{font-size:0.75rem;color:#999;margin-bottom:4px;}
 .summary-card .value{font-size:1.8rem;font-weight:700;}
-.summary-card .sub{font-size:0.75rem;color:#aaa;margin-top:2px;}
-.section-title{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
-.section-title .hint{font-size:0.75rem;color:#bbb;font-weight:400;}
-.pipeline-stage{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid #eee;text-align:center;}
-.pipeline-stage .stage-name{font-size:0.95rem;font-weight:600;margin-bottom:4px;}
-.pipeline-stage .stage-stat{font-size:0.8rem;color:#999;}
-.pipeline-stages{margin-bottom:28px;}
+.summary-card .sub{font-size:0.72rem;color:#aaa;margin-top:2px;}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.section-title{font-size:1rem;font-weight:700;}
+.section-hint{font-size:0.75rem;color:#bbb;}
+/* Kanban */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:28px;min-height:200px;}
+.kanban-col{background:#fff;border-radius:14px;border:1px solid #eee;padding:14px 10px;display:flex;flex-direction:column;}
+.kanban-col-header{text-align:center;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:10px;}
+.kanban-col-header .col-title{font-size:0.88rem;font-weight:600;}
+.kanban-col-header .col-stat{font-size:0.75rem;color:#999;margin-top:2px;}
+.kanban-cards{flex:1;display:flex;flex-direction:column;gap:8px;}
+.kanban-card{background:#fafafa;border-radius:10px;padding:12px;cursor:pointer;transition:box-shadow .2s;border:1px solid #f0f0f0;}
+.kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);background:#f5f5f5;}
+.kanban-card .kc-name{font-size:0.88rem;font-weight:700;margin-bottom:2px;}
+.kanban-card .kc-sector{font-size:0.72rem;color:#999;}
+.kanban-card .kc-amount{font-size:0.95rem;font-weight:700;margin:4px 0;}
+.kanban-card .kc-date{font-size:0.72rem;color:#aaa;margin-bottom:6px;}
+.kanban-card .kc-bar{height:5px;border-radius:3px;background:#eee;display:flex;overflow:hidden;gap:1px;margin-bottom:6px;}
+.kanban-card .kc-bar .seg{height:100%;border-radius:3px;flex:1;}
+.seg-done{background:#4ade80;}
+.seg-current{background:#3b82f6;}
+.seg-future{background:#e0e0e0;}
+.kanban-card .kc-mgr .mgr-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:600;}
+/* Milestone table */
 .milestone-table{width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;}
 .milestone-table thead{background:#fafafa;}
 .milestone-table th{padding:12px 10px;font-size:0.75rem;color:#999;font-weight:500;text-align:left;border-bottom:1px solid #eee;}
-.milestone-table td{padding:12px 10px;font-size:0.85rem;border-bottom:1px solid #f5f5f5;vertical-align:middle;cursor:pointer;}
+.milestone-table td{padding:12px 10px;font-size:0.82rem;border-bottom:1px solid #f5f5f5;vertical-align:middle;cursor:pointer;}
 .milestone-table tr:last-child td{border-bottom:none;}
 .milestone-table tbody tr:hover{background:#fafafa;}
 .stage-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;}
@@ -50,34 +68,17 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 .progress-dots{display:flex;gap:3px;}
 .progress-dots span{width:8px;height:8px;border-radius:50%;background:#e0e0e0;}
 .progress-dots span.active{background:#4ade80;}
-.company-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:28px;}
-.company-card{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;cursor:pointer;transition:box-shadow .2s;}
-.company-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.06);}
-.company-card .c-name{font-size:1rem;font-weight:700;}
-.company-card .c-sector{font-size:0.78rem;color:#999;margin-bottom:2px;}
-.company-card .c-amount{font-size:1.05rem;font-weight:700;margin-bottom:2px;}
-.company-card .c-date{font-size:0.75rem;color:#aaa;margin-bottom:6px;}
-.company-card .c-manager{font-size:0.75rem;margin-top:6px;}
-.company-card .c-manager .mgr-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:600;margin-right:4px;}
-.progress-bar{height:6px;border-radius:3px;background:#eee;display:flex;overflow:hidden;gap:2px;}
-.progress-bar .seg{height:100%;border-radius:3px;flex:1;}
-.seg-done{background:#4ade80;}
-.seg-current{background:#3b82f6;}
-.seg-future{background:#e0e0e0;}
 .footer-note{text-align:center;font-size:0.75rem;color:#bbb;padding:20px 0;}
 /* Modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1000;justify-content:center;align-items:center;}
 .modal-overlay.active{display:flex;}
 .modal{background:#fff;border-radius:16px;padding:28px;width:90vw;max-width:90vw;max-height:88vh;overflow-y:auto;}
 .modal h2{font-size:1.15rem;margin-bottom:20px;font-weight:700;}
-/* Detail modal layout */
-.detail-header{margin-bottom:20px;}
-.detail-header h2{font-size:1.2rem;margin-bottom:12px;}
-.detail-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:0.85rem;}
-.detail-meta .dm-label{color:#999;font-size:0.75rem;display:block;}
-.detail-meta .dm-value{font-weight:600;margin-top:2px;}
+.detail-meta{display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:0.85rem;margin-bottom:20px;}
 .detail-meta .dm-item{min-width:60px;}
-.detail-section{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;}
+.detail-meta .dm-label{color:#999;font-size:0.72rem;display:block;}
+.detail-meta .dm-value{font-weight:600;margin-top:2px;}
+.detail-section{margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0;}
 .detail-section h3{font-size:0.9rem;font-weight:600;margin-bottom:10px;color:#555;}
 .history-timeline{position:relative;padding-left:20px;}
 .history-timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e0e0e0;}
@@ -97,31 +98,37 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 .detail-actions{display:flex;gap:8px;margin-top:24px;justify-content:space-between;align-items:center;}
 .detail-actions-left{display:flex;gap:8px;}
 .detail-actions-right{display:flex;gap:8px;}
-/* Form (add modal) */
 .form-group{margin-bottom:12px;}
 .form-group label{display:block;font-size:0.8rem;color:#666;margin-bottom:4px;font-weight:500;}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.9rem;outline:none;font-family:inherit;}
 .form-group input:focus,.form-group select:focus{border-color:#1a1a1a;}
 .form-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(max-width:480px){
-.company-cards-grid{grid-template-columns:1fr;}
-.detail-meta{gap:10px;}
+@media(max-width:768px){
+.summary-grid{grid-template-columns:1fr 1fr;}
+.kanban{grid-template-columns:1fr;gap:8px;}
+.kanban-col{min-height:auto;}
 .form-row{grid-template-columns:1fr;}
+.top-bar{flex-direction:column;}
 }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>투자 파이프라인 현황판</h1>
-  <p class="subtitle">5단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</p>
-  <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
-  <div class="btn-row">
-    <button class="btn" onclick="exportJSON()">데이터 내보내기</button>
-    <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-    <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
+  <div class="top-bar">
+    <div class="top-left">
+      <h1>투자 파이프라인 현황판</h1>
+      <div class="subtitle">5단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</div>
+      <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
+    </div>
+    <div class="top-right">
+      <button class="btn" onclick="exportJSON()">내보내기</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
+    </div>
   </div>
+
   <div class="summary-grid">
     <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div></div>
@@ -129,13 +136,10 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
     <div class="summary-card"><div class="label">납입 완료</div><div class="value" id="sumDone">0억</div><div class="sub" id="sumDoneSub"></div></div>
   </div>
 
-  <div class="section-title">파이프라인 (5단계) <span class="hint">카드 클릭 시 상세/이력 편집</span></div>
-  <div class="pipeline-stages" id="pipelineStages"></div>
+  <div class="section-header"><div class="section-title">파이프라인 (5단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
+  <div class="kanban" id="kanbanBoard"></div>
 
-  <div class="section-title">기업별 상세</div>
-  <div class="company-cards-grid" id="companyCards"></div>
-
-  <div class="section-title">다음 마일스톤 (임박순)</div>
+  <div class="section-header"><div class="section-title">다음 마일스톤 (임박순)</div></div>
   <table class="milestone-table">
     <thead><tr><th>기업명</th><th>섹터</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
     <tbody id="milestoneBody"></tbody>
@@ -146,7 +150,7 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 
 <!-- Add Modal -->
 <div class="modal-overlay" id="addModal">
-<div class="modal">
+<div class="modal" style="max-width:520px;">
   <h2>기업 추가</h2>
   <div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div>
   <div class="form-row">
@@ -172,7 +176,7 @@ h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
 
 <!-- Detail Modal -->
 <div class="modal-overlay" id="detailModal">
-<div class="modal" id="detailModalContent"></div>
+<div class="modal" style="max-width:620px;" id="detailModalContent"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -203,7 +207,7 @@ dealsRef.orderBy('name').onSnapshot(snap=>{
   renderAll();
 });
 
-function renderAll(){renderSummary();renderPipeline();renderMilestones();renderCards();}
+function renderAll(){renderSummary();renderKanban();renderMilestones();}
 
 function getCurrentStage(c){
   if(!c.history||c.history.length===0)return{stage:'s1',date:''};
@@ -222,7 +226,6 @@ function getMgrColor(name){
   const c=MGR_COLORS[Math.abs(hash)%MGR_COLORS.length].split(':');
   return{bg:c[0],fg:c[1]};
 }
-function stageBadgeClass(s){return 'badge-'+s;}
 
 function renderSummary(){
   document.getElementById('sumCount').textContent=companies.length+'개사';
@@ -246,13 +249,44 @@ function renderSummary(){
   document.getElementById('sumDoneSub').textContent=doneComps.length+'개사';
 }
 
-function renderPipeline(){
-  const el=document.getElementById('pipelineStages');
+function renderKanban(){
+  const el=document.getElementById('kanbanBoard');
+  const grouped={};
+  STAGE_KEYS.forEach(sk=>grouped[sk]=[]);
+  companies.forEach(c=>{const s=getCurrentStage(c).stage;if(grouped[s])grouped[s].push(c);});
   let html='';
   STAGE_KEYS.forEach(sk=>{
-    const inStage=companies.filter(c=>getCurrentStage(c).stage===sk);
-    const amt=inStage.reduce((s,c)=>s+(c.amount||0),0);
-    html+=`<div class="pipeline-stage"><div class="stage-name">${STAGES[sk]}</div><div class="stage-stat">${inStage.length}개사 · ${amt}억</div></div>`;
+    const list=grouped[sk];
+    const amt=list.reduce((s,c)=>s+(c.amount||0),0);
+    html+=`<div class="kanban-col">
+      <div class="kanban-col-header">
+        <div class="col-title">${STAGES[sk]}</div>
+        <div class="col-stat">${list.length}개사 · ${amt}억</div>
+      </div>
+      <div class="kanban-cards">`;
+    list.forEach(c=>{
+      const cur=getCurrentStage(c);
+      const curIdx=getStageIndex(cur.stage);
+      const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
+      const mc=getMgrColor(c.manager);
+      let bar='<div class="kc-bar">';
+      for(let i=0;i<5;i++){
+        if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;
+        else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;
+        else bar+=`<div class="seg seg-future"></div>`;
+      }
+      bar+='</div>';
+      const mgrHtml=c.manager?`<span class="mgr-badge" style="background:${mc.bg};color:${mc.fg};">${c.manager}</span>`:'';
+      html+=`<div class="kanban-card" onclick="openDetail('${c.id}')">
+        <div class="kc-name">${c.name}</div>
+        <div class="kc-sector">${c.sector||''}</div>
+        <div class="kc-amount">${c.amount||0}억</div>
+        <div class="kc-date">진입: ${entryDate}</div>
+        ${bar}
+        <div class="kc-mgr">${mgrHtml}</div>
+      </div>`;
+    });
+    html+=`</div></div>`;
   });
   el.innerHTML=html;
 }
@@ -280,40 +314,8 @@ function renderMilestones(){
     for(let i=0;i<5;i++){dots+=`<span class="${i<=curIdx?'active':''}"></span>`;}
     dots+='</div>';
     const mc=getMgrColor(c.manager);
-    const mgrHtml=c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;">${c.manager}</span>`:'<span style="color:#ccc;font-size:0.8rem;">-</span>';
-    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${mgrHtml}</td><td><span class="stage-badge ${stageBadgeClass(cur.stage)}">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
-  });
-  el.innerHTML=html;
-}
-
-function renderCards(){
-  const el=document.getElementById('companyCards');
-  // group by stage
-  const grouped={};
-  STAGE_KEYS.forEach(sk=>grouped[sk]=[]);
-  companies.forEach(c=>{const s=getCurrentStage(c).stage;if(grouped[s])grouped[s].push(c);});
-  let html='';
-  companies.forEach(c=>{
-    const cur=getCurrentStage(c);
-    const curIdx=getStageIndex(cur.stage);
-    let bar='<div class="progress-bar">';
-    for(let i=0;i<5;i++){
-      if(i<curIdx)bar+=`<div class="seg seg-done"></div>`;
-      else if(i===curIdx)bar+=`<div class="seg seg-current"></div>`;
-      else bar+=`<div class="seg seg-future"></div>`;
-    }
-    bar+='</div>';
-    const entryDate=cur.date?(cur.date.slice(5).replace('-','/')):'';
-    const mc=getMgrColor(c.manager);
-    const mgrHtml=c.manager?`<span class="mgr-badge" style="background:${mc.bg};color:${mc.fg};">${c.manager}</span>`:'';
-    html+=`<div class="company-card" onclick="openDetail('${c.id}')">
-      <div class="c-name">${c.name}</div>
-      <div class="c-sector">${c.sector||''}</div>
-      <div class="c-amount">${c.amount||0}억</div>
-      <div class="c-date">진입: ${entryDate}</div>
-      ${bar}
-      <div class="c-manager">${mgrHtml}</div>
-    </div>`;
+    const mgrHtml=c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;">${c.manager}</span>`:'<span style="color:#ccc;">-</span>';
+    html+=`<tr onclick="openDetail('${c.id}')"><td><strong>${c.name}</strong></td><td>${c.sector||''}</td><td>${mgrHtml}</td><td><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]||cur.stage}</span></td><td>${c.amount||0}억</td><td>${nextLabel} · ${nextDate}</td><td>${ddayHtml}</td><td>${dots}</td></tr>`;
   });
   el.innerHTML=html;
 }
@@ -334,17 +336,14 @@ function closeAddModal(){document.getElementById('addModal').classList.remove('a
 async function saveNewDeal(){
   const name=document.getElementById('aName').value.trim();
   if(!name){alert('회사명을 입력하세요');return;}
-  const sector=document.getElementById('aSector').value.trim();
-  const manager=document.getElementById('aManager').value.trim();
-  const amount=parseInt(document.getElementById('aAmount').value)||0;
-  const stage=document.getElementById('aStage').value;
-  const date=document.getElementById('aDate').value;
-  const note=document.getElementById('aNote').value.trim();
   await dealsRef.add({
-    name,sector,manager,amount,
-    history:[{stage,date}],
+    name,
+    sector:document.getElementById('aSector').value.trim(),
+    manager:document.getElementById('aManager').value.trim(),
+    amount:parseInt(document.getElementById('aAmount').value)||0,
+    history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],
     plannedNext:{stage:null,date:null},
-    note
+    note:document.getElementById('aNote').value.trim()
   });
   closeAddModal();
 }
@@ -354,101 +353,64 @@ function openDetail(id){
   const c=companies.find(x=>x.id===id);if(!c)return;
   const cur=getCurrentStage(c);
   const mc=getMgrColor(c.manager);
-  let html=`<div class="detail-header"><h2>${c.name}</h2>
+  let html=`<h2>${c.name}</h2>
     <div class="detail-meta">
       <div class="dm-item"><span class="dm-label">섹터</span><span class="dm-value">${c.sector||'-'}</span></div>
       <div class="dm-item"><span class="dm-label">금액</span><span class="dm-value">${c.amount||0}억</span></div>
-      <div class="dm-item"><span class="dm-label">현재 단계</span><span class="dm-value"><span class="stage-badge ${stageBadgeClass(cur.stage)}">${STAGES[cur.stage]}</span></span></div>
+      <div class="dm-item"><span class="dm-label">현재 단계</span><span class="dm-value"><span class="stage-badge badge-${cur.stage}">${STAGES[cur.stage]}</span></span></div>
       <div class="dm-item"><span class="dm-label">담당자</span><span class="dm-value">${c.manager?`<span style="background:${mc.bg};color:${mc.fg};padding:2px 8px;border-radius:10px;font-size:0.78rem;font-weight:600;">${c.manager}</span>`:'미지정'}</span></div>
-    </div></div>`;
-
+    </div>`;
   // History
   html+=`<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">`;
   if(c.history&&c.history.length>0){
     c.history.forEach((h,i)=>{
-      html+=`<div class="history-item">
-        <span class="h-date">${h.date||''}</span>
-        <span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span>
-        <button class="h-del" onclick="deleteHistory('${c.id}',${i})" title="삭제">✕</button>
-      </div>`;
+      html+=`<div class="history-item"><span class="h-date">${h.date||''}</span><span class="h-stage">${STAGES[h.stage]||h.stage}${i===c.history.length-1?' (현재)':''}</span><button class="h-del" onclick="event.stopPropagation();deleteHistory('${c.id}',${i})" title="삭제">✕</button></div>`;
     });
   }
-  html+=`</div>`;
-  // Add history row
-  html+=`<div class="add-history-row">
+  html+=`</div><div class="add-history-row">
     <select id="newHistStage">${STAGE_KEYS.map(sk=>`<option value="${sk}">${STAGES[sk]}</option>`).join('')}</select>
     <input type="date" id="newHistDate" value="${new Date().toISOString().slice(0,10)}">
     <button class="btn btn-sm btn-primary" onclick="addHistory('${c.id}')">+ 단계 기록</button>
   </div></div>`;
-
   // Next stage
   html+=`<div class="detail-section"><h3>다음 예상 단계</h3>
     <div class="next-stage-row">
-      <div class="ns-group"><label>단계</label><select id="nextStageSelect">
-        <option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}
-      </select></div>
+      <div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>${STAGE_KEYS.map(sk=>`<option value="${sk}" ${c.plannedNext&&c.plannedNext.stage===sk?'selected':''}>${STAGES[sk]}</option>`).join('')}</select></div>
       <div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="${c.plannedNext&&c.plannedNext.date?c.plannedNext.date:''}"></div>
-    </div>
-    <div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div>
-  </div>`;
-
+    </div><div class="next-stage-hint">예정일이 없으면 '미정'으로 표시됩니다.</div></div>`;
   // Note
-  html+=`<div class="detail-section"><h3>비고</h3>
-    <textarea id="detailNote" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;resize:vertical;">${c.note||''}</textarea>
-  </div>`;
-
+  html+=`<div class="detail-section"><h3>비고</h3><textarea id="detailNote" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:0.85rem;font-family:inherit;resize:vertical;">${c.note||''}</textarea></div>`;
   // Actions
-  html+=`<div class="detail-actions">
-    <div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div>
-    <div class="detail-actions-right">
-      <button class="btn btn-sm" onclick="closeDetailModal()">닫기</button>
-      <button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button>
-    </div>
-  </div>`;
-
+  html+=`<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal('${c.id}')">이 기업 삭제</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">닫기</button><button class="btn btn-sm btn-primary" onclick="saveDetail('${c.id}')">수정</button></div></div>`;
   document.getElementById('detailModalContent').innerHTML=html;
   document.getElementById('detailModal').classList.add('active');
 }
-
 function closeDetailModal(){document.getElementById('detailModal').classList.remove('active');}
 
 async function addHistory(id){
-  const stage=document.getElementById('newHistStage').value;
-  const date=document.getElementById('newHistDate').value;
   const c=companies.find(x=>x.id===id);if(!c)return;
   const history=c.history?[...c.history]:[];
-  history.push({stage,date});
+  history.push({stage:document.getElementById('newHistStage').value,date:document.getElementById('newHistDate').value});
   await dealsRef.doc(id).update({history});
   setTimeout(()=>openDetail(id),300);
 }
-
 async function deleteHistory(id,index){
   const c=companies.find(x=>x.id===id);if(!c)return;
   if(c.history.length<=1){alert('최소 1개의 이력이 필요합니다.');return;}
-  const history=[...c.history];
-  history.splice(index,1);
+  const history=[...c.history];history.splice(index,1);
   await dealsRef.doc(id).update({history});
   setTimeout(()=>openDetail(id),300);
 }
-
 async function saveDetail(id){
-  const nextStage=document.getElementById('nextStageSelect').value||null;
-  const nextDate=document.getElementById('nextStageDate').value||null;
-  const note=document.getElementById('detailNote').value.trim();
   await dealsRef.doc(id).update({
-    plannedNext:{stage:nextStage,date:nextDate},
-    note
+    plannedNext:{stage:document.getElementById('nextStageSelect').value||null,date:document.getElementById('nextStageDate').value||null},
+    note:document.getElementById('detailNote').value.trim()
   });
   closeDetailModal();
 }
-
 async function deleteDeal(id){
-  const c=companies.find(x=>x.id===id);
-  if(!c)return;
-  if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){
-    await dealsRef.doc(id).delete();
-    closeDetailModal();
-  }
+  const c=companies.find(x=>x.id===id);if(!c)return;
+  if(confirm(c.name+' 을(를) 삭제하시겠습니까?')){await dealsRef.doc(id).delete();closeDetailModal();}
 }
 
 // === Export / Import ===
@@ -456,10 +418,8 @@ function exportJSON(){
   const data={companies:companies.map(c=>{const{id,...rest}=c;return rest;})};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
+  a.download='investment_pipeline_'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
-
 async function importJSON(e){
   const file=e.target.files[0];if(!file)return;
   const text=await file.text();
@@ -468,13 +428,8 @@ async function importJSON(e){
     if(!data.companies||!Array.isArray(data.companies)){alert('올바른 JSON 형식이 아닙니다.');return;}
     if(!confirm(data.companies.length+'개 기업 데이터를 가져옵니다. 기존 데이터는 삭제됩니다. 계속하시겠습니까?'))return;
     const existing=await dealsRef.get();
-    const batch=db.batch();
-    existing.forEach(doc=>batch.delete(doc.ref));
-    await batch.commit();
-    for(const c of data.companies){
-      const{id,...rest}=c;
-      await dealsRef.add(rest);
-    }
+    const batch=db.batch();existing.forEach(doc=>batch.delete(doc.ref));await batch.commit();
+    for(const c of data.companies){const{id,...rest}=c;await dealsRef.add(rest);}
     alert('가져오기 완료!');
   }catch(err){alert('JSON 파싱 오류: '+err.message);}
   e.target.value='';
