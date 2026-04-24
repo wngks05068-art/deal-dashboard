@@ -235,12 +235,12 @@ function renderSummary(){
     let h='';
     funds.forEach(f=>{
       let amt=0;companies.forEach(c=>{if(c.fundAllocs)c.fundAllocs.forEach(a=>{if(a.fund===f.name)amt+=(a.amount||0);});});
-      h+=`<div class="fund-row"><span class="fund-name"><span class="badge-inline" style="background:${bg(f.color)};color:${f.color};font-size:0.65rem;padding:1px 6px;">${f.short}</span></span><span class="fund-amt">${amt}억</span></div>`;
+      h+='<div class="fund-row"><span class="fund-name"><span class="badge-inline" style="background:'+bg(f.color)+';color:'+f.color+';font-size:0.65rem;padding:1px 6px;">'+f.short+'</span></span><span class="fund-amt">'+amt+'억</span></div>';
     });
     let unAmt=0;companies.forEach(c=>{if(!c.fundAllocs||c.fundAllocs.length===0)unAmt+=(c.amount||0);else c.fundAllocs.forEach(a=>{if(!a.fund)unAmt+=(a.amount||0);});});
-    if(unAmt>0)h+=`<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">${unAmt}억</span></div>`;
+    if(unAmt>0)h+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unAmt+'억</span></div>';
     fbEl.innerHTML=h;
-  }else fbEl.innerHTML='';
+  }else{fbEl.innerHTML='';}
   let nr=null,nc=null;
   companies.forEach(c=>{if(c.plannedNext&&c.plannedNext.date){const d=dday(c.plannedNext.date);if(d!==null&&d>=0&&(nr===null||d<nr)){nr=d;nc=c;}}});
   if(nc&&nc.plannedNext){document.getElementById('sumNearest').textContent=(nc.plannedNext.date||'').slice(5).replace('-','/');document.getElementById('sumNearestSub').textContent=nc.name+' · '+STAGES[nc.plannedNext.stage||'s5'];}
@@ -248,21 +248,23 @@ function renderSummary(){
   const dc=companies.filter(c=>getCur(c).stage==='s5');
   document.getElementById('sumDone').textContent=dc.reduce((s,c)=>s+getTotalAmt(c),0)+'억';
   document.getElementById('sumDoneSub').textContent=dc.length+'개사';
-  const mbEl=document.getElementById('mgrBreakdown');
-if(managers.length>0){
-  let mh='';
-  managers.forEach(m=>{
-    const mComps=companies.filter(c=>getMgrNames(c).includes(m.name));
-    const mAmt=mComps.reduce((s,c)=>s+getTotalAmt(c),0);
-    mh+=`<div class="fund-row"><span class="fund-name"><span class="badge-inline" style="background:${bg(m.color)};color:${m.color};font-size:0.65rem;padding:1px 6px;">${m.name}</span></span><span class="fund-amt">${mComps.length}건 · ${mAmt}억</span></div>`;
-  });
-  const noMgr=companies.filter(c=>getMgrNames(c).length===0);
-  if(noMgr.length>0){const nAmt=noMgr.reduce((s,c)=>s+getTotalAmt(c),0);mh+=`<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">${noMgr.length}건 · ${nAmt}억</span></div>`;}
-  mbEl.innerHTML=mh;
-}else mbEl.innerHTML='';
-
-  
+  var mbEl=document.getElementById('mgrBreakdown');
+  if(mbEl){
+    if(managers.length>0){
+      var mh='';
+      for(var i=0;i<managers.length;i++){
+        var m=managers[i];
+        var mComps=companies.filter(function(c){return getMgrNames(c).indexOf(m.name)>=0;});
+        var mAmt=mComps.reduce(function(s,c){return s+getTotalAmt(c);},0);
+        mh+='<div class="fund-row"><span class="fund-name"><span class="badge-inline" style="background:'+bg(m.color)+';color:'+m.color+';font-size:0.65rem;padding:1px 6px;">'+m.name+'</span></span><span class="fund-amt">'+mComps.length+'건 · '+mAmt+'억</span></div>';
+      }
+      var noMgr=companies.filter(function(c){return getMgrNames(c).length===0;});
+      if(noMgr.length>0){var nAmt=noMgr.reduce(function(s,c){return s+getTotalAmt(c);},0);mh+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+noMgr.length+'건 · '+nAmt+'억</span></div>';}
+      mbEl.innerHTML=mh;
+    }else{mbEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">담당자를 등록하세요</span>';}
+  }
 }
+
 
 function renderKanban(){
   const el=document.getElementById('kanbanBoard');
