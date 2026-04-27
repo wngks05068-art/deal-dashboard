@@ -189,7 +189,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   </table>
   <div class="footer-note">데이터는 Firebase에 실시간 저장됩니다. 모든 기기에서 동일한 데이터가 표시됩니다.</div>
 </div>
-<div class="modal-overlay" id="addModal"><div class="modal" style="max-width:580px;" id="addModalContent"></div></div>
+<div class="modal-overlay" id="addModal"><div class="modal" style="max-width:640px;" id="addModalContent"></div></div>
 <div class="modal-overlay" id="detailModal"><div class="modal" style="max-width:640px;" id="detailModalContent"></div></div>
 <div class="modal-overlay" id="mgrModal">
 <div class="modal" style="max-width:440px;">
@@ -485,34 +485,114 @@ function renderMilestones(){
 
 /* ===== 기업 추가 ===== */
 var addAllocCnt=0;
+var addTempHistory=[];
+
 function openAddModal(){
   addAllocCnt=0;
-  var h='<h2>기업 추가</h2><div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div><div class="form-row"><div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div><div class="form-group"><label>현재 단계</label><select id="aStage">';
-  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
-  h+='</select></div></div><div class="form-row"><div class="form-group"><label>진입일</label><input id="aDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label>비고</label><input id="aNote" placeholder="메모"></div></div>';
+  addTempHistory=[{stage:'s1',date:new Date().toISOString().slice(0,10)}];
+
+  var h='<h2>기업 추가</h2>';
+  h+='<div class="form-row-3" style="margin-bottom:12px;"><div class="form-group"><label>기업명</label><input id="aName" placeholder="(주)회사명"></div><div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div><div class="form-group"><label>비고</label><input id="aNote" placeholder="메모"></div></div>';
   h+='<div class="alloc-section"><h4>조합별 투자금액</h4><div id="addAllocRows"></div><button class="alloc-add" onclick="addAddAllocRow()">+ 조합 추가</button></div>';
   h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="addMgrChips"></div></div>';
-  h+='<div class="form-actions"><button class="btn" onclick="closeAddModal()">취소</button><button class="btn btn-primary" onclick="saveNewDeal()">저장</button></div>';
+  h+=buildAddHistoryHTML();
+  h+='<div class="detail-section"><h3>다음 예상 단계</h3><div class="next-stage-row"><div class="ns-group"><label>단계</label><select id="aNextStage"><option value="">미정</option>';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
+  h+='</select></div><div class="ns-group"><label>예정일</label><input type="date" id="aNextDate" value=""></div></div><div class="next-stage-hint">예정일이 없으면 미정으로 표시됩니다.</div></div>';
+  h+='<div class="detail-actions"><div class="detail-actions-left"></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeAddModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveNewDeal()">저장</button></div></div>';
+
   document.getElementById('addModalContent').innerHTML=h;
-  addAddAllocRow();renderChipSelect('addMgrChips',[]);
+  addAddAllocRow();
+  renderChipSelect('addMgrChips',[]);
   document.getElementById('addModal').classList.add('active');
 }
+
+function buildAddHistoryHTML(){
+  var h='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
+  if(addTempHistory.length>0){
+    for(var i=0;i<addTempHistory.length;i++){
+      var hi=addTempHistory[i];
+      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===addTempHistory.length-1?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteAddHistory('+i+')">✕</button></div>';
+    }
+  }
+  h+='</div><div class="add-history-row"><select id="aNewHistStage">';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
+  h+='</select><input type="date" id="aNewHistDate" value="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-sm btn-primary" onclick="addAddHistory()">+ 단계 기록</button></div></div>';
+  return h;
+}
+
+function addAddHistory(){
+  var stg=document.getElementById('aNewHistStage').value;
+  var dt=document.getElementById('aNewHistDate').value;
+  addTempHistory.push({stage:stg,date:dt});
+  refreshAddModal();
+}
+
+function deleteAddHistory(idx){
+  addTempHistory.splice(idx,1);
+  refreshAddModal();
+}
+
+function refreshAddModal(){
+  var name=document.getElementById('aName')?document.getElementById('aName').value:'';
+  var sector=document.getElementById('aSector')?document.getElementById('aSector').value:'';
+  var note=document.getElementById('aNote')?document.getElementById('aNote').value:'';
+  var nextStg=document.getElementById('aNextStage')?document.getElementById('aNextStage').value:'';
+  var nextDt=document.getElementById('aNextDate')?document.getElementById('aNextDate').value:'';
+  var allocs=[];
+  var allocRows=document.querySelectorAll('#addAllocRows .alloc-row');
+  for(var i=0;i<allocRows.length;i++){var s=allocRows[i].querySelector('select').value;var a=allocRows[i].querySelector('input').value;allocs.push({fund:s,amount:a});}
+  var mgrs=getChipValues('addMgrChips');
+
+  addAllocCnt=0;
+  var h='<h2>기업 추가</h2>';
+  h+='<div class="form-row-3" style="margin-bottom:12px;"><div class="form-group"><label>기업명</label><input id="aName" value="'+escHtml(name)+'"></div><div class="form-group"><label>섹터</label><input id="aSector" value="'+escHtml(sector)+'"></div><div class="form-group"><label>비고</label><input id="aNote" value="'+escHtml(note)+'"></div></div>';
+  h+='<div class="alloc-section"><h4>조합별 투자금액</h4><div id="addAllocRows"></div><button class="alloc-add" onclick="addAddAllocRow()">+ 조합 추가</button></div>';
+  h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="addMgrChips"></div></div>';
+  h+=buildAddHistoryHTML();
+  h+='<div class="detail-section"><h3>다음 예상 단계</h3><div class="next-stage-row"><div class="ns-group"><label>단계</label><select id="aNextStage"><option value="">미정</option>';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'" '+(nextStg===STAGE_KEYS[i]?'selected':'')+'>'+STAGES[STAGE_KEYS[i]]+'</option>';
+  h+='</select></div><div class="ns-group"><label>예정일</label><input type="date" id="aNextDate" value="'+nextDt+'"></div></div><div class="next-stage-hint">예정일이 없으면 미정으로 표시됩니다.</div></div>';
+  h+='<div class="detail-actions"><div class="detail-actions-left"></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeAddModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveNewDeal()">저장</button></div></div>';
+
+  document.getElementById('addModalContent').innerHTML=h;
+  if(allocs.length>0){for(var i=0;i<allocs.length;i++)addAddAllocRow(allocs[i].fund,allocs[i].amount);}
+  else{addAddAllocRow();}
+  renderChipSelect('addMgrChips',mgrs);
+}
+
+function escHtml(s){return s?s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';}
+
 function addAddAllocRow(fundVal,amtVal){
   var id=addAllocCnt++;var row=document.createElement('div');row.className='alloc-row';row.id='addAlloc'+id;
   var opts='<option value="">(조합 선택)</option>';for(var i=0;i<funds.length;i++)opts+='<option value="'+funds[i].name+'" '+(fundVal===funds[i].name?'selected':'')+'>'+funds[i].short+' ('+funds[i].name+')</option>';
   row.innerHTML='<select>'+opts+'</select><input type="number" placeholder="금액" value="'+(amtVal||'')+'"><span class="alloc-unit">억</span><button class="alloc-del" onclick="document.getElementById(\'addAlloc'+id+'\').remove()">✕</button>';
   document.getElementById('addAllocRows').appendChild(row);
 }
+
 function closeAddModal(){document.getElementById('addModal').classList.remove('active');}
+
 function saveNewDeal(){
   var name=document.getElementById('aName').value.trim();if(!name){alert('회사명을 입력하세요');return;}
   var allocs=[],rows=document.querySelectorAll('#addAllocRows .alloc-row');
   for(var i=0;i<rows.length;i++){var s=rows[i].querySelector('select').value,a=parseInt(rows[i].querySelector('input').value)||0;if(s&&a>0)allocs.push({fund:s,amount:a});}
   var mgrs=getChipValues('addMgrChips');
   var totalAmt=0;for(var i=0;i<allocs.length;i++)totalAmt+=allocs[i].amount;
-  dealsRef.add({name:name,sector:document.getElementById('aSector').value.trim(),managers:mgrs,fundAllocs:allocs,amount:totalAmt,history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],plannedNext:{stage:null,date:null},note:document.getElementById('aNote').value.trim()});
+  var nextStg=document.getElementById('aNextStage').value||null;
+  var nextDt=document.getElementById('aNextDate').value||null;
+  dealsRef.add({
+    name:name,
+    sector:document.getElementById('aSector').value.trim(),
+    managers:mgrs,
+    fundAllocs:allocs,
+    amount:totalAmt,
+    history:addTempHistory.length>0?addTempHistory:[{stage:'s1',date:new Date().toISOString().slice(0,10)}],
+    plannedNext:{stage:nextStg,date:nextDt},
+    note:document.getElementById('aNote').value.trim()
+  });
   closeAddModal();
 }
+
 
 /* ===== 기업 상세 (tempHistory 로컬 방식) ===== */
 var detailAllocCnt=0;
