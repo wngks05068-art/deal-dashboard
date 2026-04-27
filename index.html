@@ -519,14 +519,17 @@ function openAddModal(){
 function buildAddHistoryHTML(){
   var h='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
   if(addTempHistory.length>0){
+    var sorted=addTempHistory.slice();
+    sorted.sort(function(a,b){if(a.date===b.date)return sIdx(b.stage)-sIdx(a.stage);return a.date>b.date?-1:a.date<b.date?1:0;});
     var curIdx=0;
-    for(var ci2=1;ci2<addTempHistory.length;ci2++){
-      if(addTempHistory[ci2].date>addTempHistory[curIdx].date)curIdx=ci2;
-      else if(addTempHistory[ci2].date===addTempHistory[curIdx].date&&sIdx(addTempHistory[ci2].stage)>sIdx(addTempHistory[curIdx].stage))curIdx=ci2;
+    for(var ci2=1;ci2<sorted.length;ci2++){
+      if(sorted[ci2].date>sorted[curIdx].date)curIdx=ci2;
+      else if(sorted[ci2].date===sorted[curIdx].date&&sIdx(sorted[ci2].stage)>sIdx(sorted[curIdx].stage))curIdx=ci2;
     }
-    for(var i=0;i<addTempHistory.length;i++){
-      var hi=addTempHistory[i];
-      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteAddHistory('+i+')">✕</button></div>';
+    for(var i=0;i<sorted.length;i++){
+      var hi=sorted[i];
+      var origIdx=-1;for(var oi=0;oi<addTempHistory.length;oi++){if(addTempHistory[oi]===hi){origIdx=oi;break;}}
+      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteAddHistory('+origIdx+')">✕</button></div>';
     }
   }
   h+='</div><div class="add-history-row"><select id="aNewHistStage">';
@@ -534,6 +537,7 @@ function buildAddHistoryHTML(){
   h+='</select><input type="date" id="aNewHistDate" value="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-sm btn-primary" onclick="addAddHistory()">+ 단계 기록</button></div></div>';
   return h;
 }
+
 
 
 function addAddHistory(){
@@ -620,16 +624,20 @@ function renderDetailModal(id){
   h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="detailMgrChips"></div></div>';
   h+='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
   if(tempHistory.length>0){
+    var sorted=tempHistory.slice();
+    sorted.sort(function(a,b){if(a.date===b.date)return sIdx(b.stage)-sIdx(a.stage);return a.date>b.date?-1:a.date<b.date?1:0;});
     var curIdx=0;
-    for(var ci2=1;ci2<tempHistory.length;ci2++){
-      if(tempHistory[ci2].date>tempHistory[curIdx].date)curIdx=ci2;
-      else if(tempHistory[ci2].date===tempHistory[curIdx].date&&sIdx(tempHistory[ci2].stage)>sIdx(tempHistory[curIdx].stage))curIdx=ci2;
+    for(var ci2=1;ci2<sorted.length;ci2++){
+      if(sorted[ci2].date>sorted[curIdx].date)curIdx=ci2;
+      else if(sorted[ci2].date===sorted[curIdx].date&&sIdx(sorted[ci2].stage)>sIdx(sorted[curIdx].stage))curIdx=ci2;
     }
-    for(var i=0;i<tempHistory.length;i++){
-      var hi=tempHistory[i];
-      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteHistory(\''+id+'\','+i+')">✕</button></div>';
+    for(var i=0;i<sorted.length;i++){
+      var hi=sorted[i];
+      var origIdx=-1;for(var oi=0;oi<tempHistory.length;oi++){if(tempHistory[oi]===hi){origIdx=oi;break;}}
+      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteHistory(\''+id+'\','+origIdx+')">✕</button></div>';
     }
   }
+
   h+='</div><div class="add-history-row"><select id="newHistStage">';
   for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
   h+='</select><input type="date" id="newHistDate" value="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-sm btn-primary" onclick="addHistory(\''+id+'\')">+ 단계 기록</button></div></div>';
