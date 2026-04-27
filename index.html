@@ -260,7 +260,16 @@ completedRef.orderBy('date','desc').onSnapshot(function(s){
 });
 
 function renderAll(){renderSummary();renderKanban();renderMilestones();}
-function getCur(c){if(!c.history||!c.history.length)return{stage:'s1',date:''};return c.history[c.history.length-1];}
+function getCur(c){
+  if(!c.history||!c.history.length)return{stage:'s1',date:''};
+  var best=c.history[0];
+  for(var i=1;i<c.history.length;i++){
+    var h=c.history[i];
+    if(h.date>best.date){best=h;}
+    else if(h.date===best.date&&sIdx(h.stage)>sIdx(best.stage)){best=h;}
+  }
+  return best;
+}
 function sIdx(s){return STAGE_KEYS.indexOf(s);}
 function ddayCalc(ds){if(!ds)return null;var t=new Date();t.setHours(0,0,0,0);var d=new Date(ds);d.setHours(0,0,0,0);return Math.ceil((d-t)/864e5);}
 function cbg(c){return COLOR_BG[c]||'#f5f5f5';}
@@ -510,9 +519,14 @@ function openAddModal(){
 function buildAddHistoryHTML(){
   var h='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
   if(addTempHistory.length>0){
+    var curIdx=0;
+    for(var ci2=1;ci2<addTempHistory.length;ci2++){
+      if(addTempHistory[ci2].date>addTempHistory[curIdx].date)curIdx=ci2;
+      else if(addTempHistory[ci2].date===addTempHistory[curIdx].date&&sIdx(addTempHistory[ci2].stage)>sIdx(addTempHistory[curIdx].stage))curIdx=ci2;
+    }
     for(var i=0;i<addTempHistory.length;i++){
       var hi=addTempHistory[i];
-      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===addTempHistory.length-1?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteAddHistory('+i+')">✕</button></div>';
+      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteAddHistory('+i+')">✕</button></div>';
     }
   }
   h+='</div><div class="add-history-row"><select id="aNewHistStage">';
@@ -520,6 +534,7 @@ function buildAddHistoryHTML(){
   h+='</select><input type="date" id="aNewHistDate" value="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-sm btn-primary" onclick="addAddHistory()">+ 단계 기록</button></div></div>';
   return h;
 }
+
 
 function addAddHistory(){
   var stg=document.getElementById('aNewHistStage').value;
@@ -605,9 +620,14 @@ function renderDetailModal(id){
   h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="detailMgrChips"></div></div>';
   h+='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
   if(tempHistory.length>0){
+    var curIdx=0;
+    for(var ci2=1;ci2<tempHistory.length;ci2++){
+      if(tempHistory[ci2].date>tempHistory[curIdx].date)curIdx=ci2;
+      else if(tempHistory[ci2].date===tempHistory[curIdx].date&&sIdx(tempHistory[ci2].stage)>sIdx(tempHistory[curIdx].stage))curIdx=ci2;
+    }
     for(var i=0;i<tempHistory.length;i++){
       var hi=tempHistory[i];
-      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===tempHistory.length-1?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteHistory(\''+id+'\','+i+')">✕</button></div>';
+      h+='<div class="history-item"><span class="h-date">'+(hi.date||'')+'</span><span class="h-stage">'+(STAGES[hi.stage]||hi.stage)+(i===curIdx?' (현재)':'')+'</span><button class="h-del" onclick="event.stopPropagation();deleteHistory(\''+id+'\','+i+')">✕</button></div>';
     }
   }
   h+='</div><div class="add-history-row"><select id="newHistStage">';
