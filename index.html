@@ -267,19 +267,29 @@ var mgrsRef=db.collection('managers');
 var fundsRef=db.collection('funds');
 var completedRef=db.collection('completedDeals');
 
-/* ===== 4단계 (투자금 납입 제거) ===== */
 var STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약'};
 var STAGE_KEYS=['s1','s2','s3','s4'];
 var COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
 var companies=[],managers=[],funds=[],completedDeals=[];
 
+/* ===== 열린 모달 추적 ===== */
+var currentDetailId=null;
+
 document.getElementById('todayDate').textContent='오늘: '+new Date().toISOString().slice(0,10);
 
-/* ===== Firebase 실시간 리스너 ===== */
 dealsRef.orderBy('name').onSnapshot(function(s){
   companies=[];
-  s.forEach(function(d){companies.push({id:d.id,name:d.data().name,sector:d.data().sector,managers:d.data().managers||[],manager:d.data().manager||'',fundAllocs:d.data().fundAllocs||[],fund:d.data().fund||'',amount:d.data().amount||0,history:d.data().history||[],plannedNext:d.data().plannedNext||{stage:null,date:null},note:d.data().note||''});});
+  s.forEach(function(d){
+    companies.push({id:d.id,name:d.data().name,sector:d.data().sector,managers:d.data().managers||[],manager:d.data().manager||'',fundAllocs:d.data().fundAllocs||[],fund:d.data().fund||'',amount:d.data().amount||0,history:d.data().history||[],plannedNext:d.data().plannedNext||{stage:null,date:null},note:d.data().note||''});
+  });
   renderAll();
+  /* 모달이 열려있으면 자동 갱신 */
+  if(currentDetailId){
+    var still=false;
+    for(var i=0;i<companies.length;i++){if(companies[i].id===currentDetailId){still=true;break;}}
+    if(still) openDetail(currentDetailId);
+    else{currentDetailId=null;closeDetailModal();}
+  }
 });
 mgrsRef.orderBy('name').onSnapshot(function(s){
   managers=[];
@@ -297,7 +307,6 @@ completedRef.orderBy('date','desc').onSnapshot(function(s){
   renderAll();
 });
 
-/* ===== 유틸 ===== */
 function renderAll(){renderSummary();renderKanban();renderMilestones();}
 function getCur(c){if(!c.history||!c.history.length)return{stage:'s1',date:''};return c.history[c.history.length-1];}
 function sIdx(s){return STAGE_KEYS.indexOf(s);}
@@ -310,14 +319,10 @@ function getFundNames(c){if(c.fundAllocs&&c.fundAllocs.length>0){var r=[];for(va
 function getMgrNames(c){if(c.managers&&c.managers.length>0)return c.managers;return c.manager?[c.manager]:[];}
 function badgeS(label,info){return '<span class="badge-inline" style="background:'+info.bg+';color:'+info.fg+';">'+label+'</span>';}
 
-/* ===== 요약 카드 렌더링 ===== */
+/* ===== 요약 카드 ===== */
 function renderSummary(){
-  /* 1) 검토 기업 수 */
   document.getElementById('sumCount').textContent=companies.length+'개사';
-
-  /* 2) 투자 예정 총액 */
-  var total=0;
-  for(var i=0;i<companies.length;i++) total+=getTotalAmt(companies[i]);
+  var total=0;for(var i=0;i<companies.length;i++)total+=getTotalAmt(companies[i]);
   document.getElementById('sumAmount').textContent=total+'억';
   document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
 
@@ -326,46 +331,30 @@ function renderSummary(){
     var h='';
     for(var fi=0;fi<funds.length;fi++){
       var f=funds[fi],amt=0;
-      for(var ci=0;ci<companies.length;ci++){
-        var c=companies[ci];
-        if(c.fundAllocs){
-          for(var ai=0;ai<c.fundAllocs.length;ai++){
-            if(c.fundAllocs[ai].fund===f.name) amt+=(c.fundAllocs[ai].amount||0);
-          }
-        }
-      }
+      for(var ci=0;ci<companies.length;ci++){var c=companies[ci];if(c.fundAllocs){for(var ai=0;ai<c.fundAllocs.length;ai++){if(c.fundAllocs[ai].fund===f.name)amt+=(c.fundAllocs[ai].amount||0);}}}
       h+='<div class="fund-row"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt">'+amt+'억</span></div>';
     }
     var unAmt=0;
-    for(var ci=0;ci<companies.length;ci++){
-      var c=companies[ci];
-      if(!c.fundAllocs||c.fundAllocs.length===0){unAmt+=(c.amount||0);}
-      else{for(var ai=0;ai<c.fundAllocs.length;ai++){if(!c.fundAllocs[ai].fund)unAmt+=(c.fundAllocs[ai].amount||0);}}
-    }
-    if(unAmt>0) h+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unAmt+'억</span></div>';
+    for(var ci=0;ci<companies.length;ci++){var c=companies[ci];if(!c.fundAllocs||c.fundAllocs.length===0){unAmt+=(c.amount||0);}else{for(var ai=0;ai<c.fundAllocs.length;ai++){if(!c.fundAllocs[ai].fund)unAmt+=(c.fundAllocs[ai].amount||0);}}}
+    if(unAmt>0)h+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unAmt+'억</span></div>';
     fbEl.innerHTML=h;
-  } else { fbEl.innerHTML=''; }
+  }else{fbEl.innerHTML='';}
 
-  /* 3) 담당자별 현황 */
   var mbEl=document.getElementById('mgrBreakdown');
   if(managers.length>0){
     var mh='';
     for(var mi=0;mi<managers.length;mi++){
       var m=managers[mi],mCnt=0,mAmt=0;
-      for(var ci=0;ci<companies.length;ci++){
-        if(getMgrNames(companies[ci]).indexOf(m.name)>=0){mCnt++;mAmt+=getTotalAmt(companies[ci]);}
-      }
+      for(var ci=0;ci<companies.length;ci++){if(getMgrNames(companies[ci]).indexOf(m.name)>=0){mCnt++;mAmt+=getTotalAmt(companies[ci]);}}
       mh+='<div class="fund-row"><span class="fund-name">'+badgeS(m.name,{bg:cbg(m.color),fg:m.color})+'</span><span class="fund-amt">'+mCnt+'건 · '+mAmt+'억</span></div>';
     }
     var noMgrCnt=0,noMgrAmt=0;
     for(var ci=0;ci<companies.length;ci++){if(getMgrNames(companies[ci]).length===0){noMgrCnt++;noMgrAmt+=getTotalAmt(companies[ci]);}}
-    if(noMgrCnt>0) mh+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+noMgrCnt+'건 · '+noMgrAmt+'억</span></div>';
+    if(noMgrCnt>0)mh+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+noMgrCnt+'건 · '+noMgrAmt+'억</span></div>';
     mbEl.innerHTML=mh;
-  } else { mbEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">담당자를 등록하세요</span>'; }
+  }else{mbEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">담당자를 등록하세요</span>';}
 
-  /* 4) 조합별 투자완료 금액 */
-  var totalComp=0;
-  for(var i=0;i<completedDeals.length;i++) totalComp+=completedDeals[i].amount;
+  var totalComp=0;for(var i=0;i<completedDeals.length;i++)totalComp+=completedDeals[i].amount;
   document.getElementById('sumCompleted').textContent=totalComp+'억';
   document.getElementById('sumCompletedSub').textContent=completedDeals.length+'건 완료';
 
@@ -375,20 +364,18 @@ function renderSummary(){
     var ch='';
     for(var fi=0;fi<funds.length;fi++){
       var f=funds[fi],cAmt=0,cCnt=0;
-      for(var ci=0;ci<completedDeals.length;ci++){
-        if(completedDeals[ci].fund===f.name){cAmt+=completedDeals[ci].amount;cCnt++;}
-      }
+      for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name){cAmt+=completedDeals[ci].amount;cCnt++;}}
       ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\''+f.name+'\')" data-fund="'+f.name+'"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt">'+cAmt+'억 ('+cCnt+'건)</span></div>';
     }
     var unCAmt=0,unCCnt=0;
     for(var ci=0;ci<completedDeals.length;ci++){if(!completedDeals[ci].fund){unCAmt+=completedDeals[ci].amount;unCCnt++;}}
-    if(unCAmt>0) ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\'\')" data-fund=""><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unCAmt+'억 ('+unCCnt+'건)</span></div>';
+    if(unCAmt>0)ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\'\')"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unCAmt+'억 ('+unCCnt+'건)</span></div>';
     cbEl.innerHTML=ch;
-  } else { cbEl.innerHTML=''; }
+  }else{cbEl.innerHTML='';}
   cdArea.innerHTML='';
+  openCompFund=null;
 }
 
-/* ===== 조합 클릭 시 투자완료 내역 토글 ===== */
 var openCompFund=null;
 function toggleCompletedDetail(fundName){
   var cdArea=document.getElementById('completedDetailArea');
@@ -396,8 +383,8 @@ function toggleCompletedDetail(fundName){
   openCompFund=fundName;
   var filtered=[];
   for(var i=0;i<completedDeals.length;i++){
-    if(fundName===''&&!completedDeals[i].fund) filtered.push(completedDeals[i]);
-    else if(completedDeals[i].fund===fundName) filtered.push(completedDeals[i]);
+    if(fundName===''&&!completedDeals[i].fund)filtered.push(completedDeals[i]);
+    else if(completedDeals[i].fund===fundName)filtered.push(completedDeals[i]);
   }
   if(filtered.length===0){cdArea.innerHTML='<div class="completed-detail-box" style="text-align:center;color:#999;">기록 없음</div>';return;}
   var h='<div class="completed-detail-box"><table><thead><tr><th>완료일</th><th>기업명</th><th>금액</th><th>담당자</th><th>비고</th><th></th></tr></thead><tbody>';
@@ -410,13 +397,12 @@ function toggleCompletedDetail(fundName){
   cdArea.innerHTML=h;
 }
 
-/* ===== 투자완료 기록 추가 모달 ===== */
 function openCompletedAddModal(){
   var fOpts='<option value="">(조합 선택)</option>';
-  for(var i=0;i<funds.length;i++) fOpts+='<option value="'+funds[i].name+'">'+funds[i].short+' ('+funds[i].name+')</option>';
+  for(var i=0;i<funds.length;i++)fOpts+='<option value="'+funds[i].name+'">'+funds[i].short+' ('+funds[i].name+')</option>';
   document.getElementById('cdFund').innerHTML=fOpts;
   var mOpts='<option value="">(선택)</option>';
-  for(var i=0;i<managers.length;i++) mOpts+='<option value="'+managers[i].name+'">'+managers[i].name+'</option>';
+  for(var i=0;i<managers.length;i++)mOpts+='<option value="'+managers[i].name+'">'+managers[i].name+'</option>';
   document.getElementById('cdManager').innerHTML=mOpts;
   document.getElementById('cdCompany').value='';
   document.getElementById('cdAmount').value='';
@@ -430,35 +416,23 @@ function saveCompletedDeal(){
   if(!company){alert('기업명을 입력하세요');return;}
   var amount=parseInt(document.getElementById('cdAmount').value)||0;
   if(amount<=0){alert('투자금액을 입력하세요');return;}
-  completedRef.add({
-    company:company,
-    fund:document.getElementById('cdFund').value,
-    amount:amount,
-    date:document.getElementById('cdDate').value,
-    manager:document.getElementById('cdManager').value,
-    note:document.getElementById('cdNote').value.trim()
-  });
+  completedRef.add({company:company,fund:document.getElementById('cdFund').value,amount:amount,date:document.getElementById('cdDate').value,manager:document.getElementById('cdManager').value,note:document.getElementById('cdNote').value.trim()});
   closeCompletedAddModal();
 }
-function deleteCompleted(id){
-  if(confirm('이 투자완료 기록을 삭제하시겠습니까?')){
-    completedRef.doc(id).delete();
-    openCompFund=null;
-  }
-}
+function deleteCompleted(id){if(confirm('이 투자완료 기록을 삭제하시겠습니까?')){completedRef.doc(id).delete();openCompFund=null;}}
 
-/* ===== 칸반 렌더링 (4단계) ===== */
+/* ===== 칸반 ===== */
 function renderKanban(){
   var el=document.getElementById('kanbanBoard');
   var g={};for(var i=0;i<STAGE_KEYS.length;i++)g[STAGE_KEYS[i]]=[];
   for(var i=0;i<companies.length;i++){
     var s=getCur(companies[i]).stage;
-    if(!g[s])g[STAGE_KEYS[0]].push(companies[i]); else g[s].push(companies[i]);
+    if(!g[s])g[STAGE_KEYS[0]].push(companies[i]);else g[s].push(companies[i]);
   }
   var h='';
   for(var si=0;si<STAGE_KEYS.length;si++){
     var sk=STAGE_KEYS[si],list=g[sk],amt=0;
-    for(var i=0;i<list.length;i++) amt+=getTotalAmt(list[i]);
+    for(var i=0;i<list.length;i++)amt+=getTotalAmt(list[i]);
     h+='<div class="kanban-col"><div class="kanban-col-header"><div class="col-title">'+STAGES[sk]+'</div><div class="col-stat">'+list.length+'개사 · '+amt+'억</div></div><div class="kanban-cards">';
     for(var i=0;i<list.length;i++){
       var c=list[i],cur=getCur(c),ci=sIdx(cur.stage),ed=cur.date?(cur.date.slice(5).replace('-','/')):'',ta=getTotalAmt(c);
@@ -474,7 +448,7 @@ function renderKanban(){
   el.innerHTML=h;
 }
 
-/* ===== 마일스톤 테이블 렌더링 ===== */
+/* ===== 마일스톤 ===== */
 function renderMilestones(){
   var el=document.getElementById('milestoneBody');
   var sorted=companies.slice().sort(function(a,b){var da=a.plannedNext&&a.plannedNext.date?new Date(a.plannedNext.date):new Date('2099-12-31');var db2=b.plannedNext&&b.plannedNext.date?new Date(b.plannedNext.date):new Date('2099-12-31');return da-db2;});
@@ -499,49 +473,38 @@ var addAllocCnt=0;
 function openAddModal(){
   addAllocCnt=0;
   var h='<h2>기업 추가</h2><div class="form-group"><label>회사명</label><input id="aName" placeholder="(주)회사명"></div><div class="form-row"><div class="form-group"><label>섹터</label><input id="aSector" placeholder="소비재, AI 등"></div><div class="form-group"><label>현재 단계</label><select id="aStage">';
-  for(var i=0;i<STAGE_KEYS.length;i++) h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
   h+='</select></div></div><div class="form-row"><div class="form-group"><label>진입일</label><input id="aDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label>비고</label><input id="aNote" placeholder="메모"></div></div>';
   h+='<div class="alloc-section"><h4>조합별 투자금액</h4><div id="addAllocRows"></div><button class="alloc-add" onclick="addAddAllocRow()">+ 조합 추가</button></div>';
   h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="addMgrChips"></div></div>';
   h+='<div class="form-actions"><button class="btn" onclick="closeAddModal()">취소</button><button class="btn btn-primary" onclick="saveNewDeal()">저장</button></div>';
   document.getElementById('addModalContent').innerHTML=h;
-  addAddAllocRow();
-  renderChipSelect('addMgrChips',[]);
+  addAddAllocRow();renderChipSelect('addMgrChips',[]);
   document.getElementById('addModal').classList.add('active');
 }
 function addAddAllocRow(fundVal,amtVal){
-  var id=addAllocCnt++;
-  var row=document.createElement('div');row.className='alloc-row';row.id='addAlloc'+id;
+  var id=addAllocCnt++;var row=document.createElement('div');row.className='alloc-row';row.id='addAlloc'+id;
   var opts='<option value="">(조합 선택)</option>';
-  for(var i=0;i<funds.length;i++) opts+='<option value="'+funds[i].name+'" '+(fundVal===funds[i].name?'selected':'')+'>'+funds[i].short+' ('+funds[i].name+')</option>';
+  for(var i=0;i<funds.length;i++)opts+='<option value="'+funds[i].name+'" '+(fundVal===funds[i].name?'selected':'')+'>'+funds[i].short+' ('+funds[i].name+')</option>';
   row.innerHTML='<select>'+opts+'</select><input type="number" placeholder="금액" value="'+(amtVal||'')+'"><span class="alloc-unit">억</span><button class="alloc-del" onclick="document.getElementById(\'addAlloc'+id+'\').remove()">✕</button>';
   document.getElementById('addAllocRows').appendChild(row);
 }
 function closeAddModal(){document.getElementById('addModal').classList.remove('active');}
 function saveNewDeal(){
-  var name=document.getElementById('aName').value.trim();
-  if(!name){alert('회사명을 입력하세요');return;}
+  var name=document.getElementById('aName').value.trim();if(!name){alert('회사명을 입력하세요');return;}
   var allocs=[],rows=document.querySelectorAll('#addAllocRows .alloc-row');
   for(var i=0;i<rows.length;i++){var s=rows[i].querySelector('select').value,a=parseInt(rows[i].querySelector('input').value)||0;if(s&&a>0)allocs.push({fund:s,amount:a});}
   var mgrs=getChipValues('addMgrChips');
   var totalAmt=0;for(var i=0;i<allocs.length;i++)totalAmt+=allocs[i].amount;
-  dealsRef.add({
-    name:name,
-    sector:document.getElementById('aSector').value.trim(),
-    managers:mgrs,
-    fundAllocs:allocs,
-    amount:totalAmt,
-    history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],
-    plannedNext:{stage:null,date:null},
-    note:document.getElementById('aNote').value.trim()
-  });
+  dealsRef.add({name:name,sector:document.getElementById('aSector').value.trim(),managers:mgrs,fundAllocs:allocs,amount:totalAmt,history:[{stage:document.getElementById('aStage').value,date:document.getElementById('aDate').value}],plannedNext:{stage:null,date:null},note:document.getElementById('aNote').value.trim()});
   closeAddModal();
 }
 
-/* ===== 기업 상세 모달 ===== */
+/* ===== 기업 상세 모달 (버그 수정 핵심) ===== */
 var detailAllocCnt=0;
 function openDetail(id){
   var c=null;for(var i=0;i<companies.length;i++){if(companies[i].id===id){c=companies[i];break;}}if(!c)return;
+  currentDetailId=id;
   var cur=getCur(c);detailAllocCnt=0;
   var h='<h2>'+c.name+'</h2><div class="form-row-3" style="margin-bottom:12px;"><div class="form-group"><label>기업명</label><input id="dName" value="'+(c.name||'')+'"></div><div class="form-group"><label>섹터</label><input id="dSector" value="'+(c.sector||'')+'"></div><div class="form-group"><label>비고</label><input id="dNote" value="'+(c.note||'')+'"></div></div>';
   h+='<div class="alloc-section"><h4>조합별 투자금액</h4><div id="detailAllocRows"></div><button class="alloc-add" onclick="addDetailAllocRow()">+ 조합 추가</button></div>';
@@ -554,27 +517,29 @@ function openDetail(id){
     }
   }
   h+='</div><div class="add-history-row"><select id="newHistStage">';
-  for(var i=0;i<STAGE_KEYS.length;i++) h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'">'+STAGES[STAGE_KEYS[i]]+'</option>';
   h+='</select><input type="date" id="newHistDate" value="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-sm btn-primary" onclick="addHistory(\''+c.id+'\')">+ 단계 기록</button></div></div>';
   h+='<div class="detail-section"><h3>다음 예상 단계</h3><div class="next-stage-row"><div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>';
-  for(var i=0;i<STAGE_KEYS.length;i++) h+='<option value="'+STAGE_KEYS[i]+'" '+(c.plannedNext&&c.plannedNext.stage===STAGE_KEYS[i]?'selected':'')+'>'+STAGES[STAGE_KEYS[i]]+'</option>';
+  for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'" '+(c.plannedNext&&c.plannedNext.stage===STAGE_KEYS[i]?'selected':'')+'>'+STAGES[STAGE_KEYS[i]]+'</option>';
   h+='</select></div><div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="'+(c.plannedNext&&c.plannedNext.date?c.plannedNext.date:'')+'"></div></div><div class="next-stage-hint">예정일이 없으면 미정으로 표시됩니다.</div></div>';
   h+='<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal(\''+c.id+'\')">이 기업 삭제</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveDetail(\''+c.id+'\')">수정</button></div></div>';
   document.getElementById('detailModalContent').innerHTML=h;
   var allocs=c.fundAllocs&&c.fundAllocs.length>0?c.fundAllocs:[{fund:c.fund||'',amount:c.amount||0}];
-  for(var i=0;i<allocs.length;i++) addDetailAllocRow(allocs[i].fund,allocs[i].amount);
+  for(var i=0;i<allocs.length;i++)addDetailAllocRow(allocs[i].fund,allocs[i].amount);
   renderChipSelect('detailMgrChips',getMgrNames(c));
   document.getElementById('detailModal').classList.add('active');
 }
 function addDetailAllocRow(fundVal,amtVal){
-  var id=detailAllocCnt++;
-  var row=document.createElement('div');row.className='alloc-row';row.id='detailAlloc'+id;
+  var id=detailAllocCnt++;var row=document.createElement('div');row.className='alloc-row';row.id='detailAlloc'+id;
   var opts='<option value="">(조합 선택)</option>';
-  for(var i=0;i<funds.length;i++) opts+='<option value="'+funds[i].name+'" '+(fundVal===funds[i].name?'selected':'')+'>'+funds[i].short+' ('+funds[i].name+')</option>';
+  for(var i=0;i<funds.length;i++)opts+='<option value="'+funds[i].name+'" '+(fundVal===funds[i].name?'selected':'')+'>'+funds[i].short+' ('+funds[i].name+')</option>';
   row.innerHTML='<select>'+opts+'</select><input type="number" placeholder="금액" value="'+(amtVal||'')+'"><span class="alloc-unit">억</span><button class="alloc-del" onclick="document.getElementById(\'detailAlloc'+id+'\').remove()">✕</button>';
   document.getElementById('detailAllocRows').appendChild(row);
 }
-function closeDetailModal(){document.getElementById('detailModal').classList.remove('active');}
+function closeDetailModal(){
+  currentDetailId=null;
+  document.getElementById('detailModal').classList.remove('active');
+}
 function saveDetail(id){
   var allocs=[],rows=document.querySelectorAll('#detailAllocRows .alloc-row');
   for(var i=0;i<rows.length;i++){var s=rows[i].querySelector('select').value,a=parseInt(rows[i].querySelector('input').value)||0;if(s&&a>0)allocs.push({fund:s,amount:a});}
@@ -582,37 +547,30 @@ function saveDetail(id){
   var totalAmt=0;for(var i=0;i<allocs.length;i++)totalAmt+=allocs[i].amount;
   var nextStg=document.getElementById('nextStageSelect').value||null;
   var nextDt=document.getElementById('nextStageDate').value||null;
-  dealsRef.doc(id).update({
-    name:document.getElementById('dName').value.trim(),
-    sector:document.getElementById('dSector').value.trim(),
-    note:document.getElementById('dNote').value.trim(),
-    managers:mgrs,
-    fundAllocs:allocs,
-    amount:totalAmt,
-    plannedNext:{stage:nextStg,date:nextDt}
-  });
+  dealsRef.doc(id).update({name:document.getElementById('dName').value.trim(),sector:document.getElementById('dSector').value.trim(),note:document.getElementById('dNote').value.trim(),managers:mgrs,fundAllocs:allocs,amount:totalAmt,plannedNext:{stage:nextStg,date:nextDt}});
   closeDetailModal();
 }
 function deleteDeal(id){if(confirm('정말 삭제하시겠습니까?')){dealsRef.doc(id).delete();closeDetailModal();}}
+
+/* ===== 핵심 수정: addHistory / deleteHistory에서 openDetail 직접 호출 제거 ===== */
 function addHistory(id){
   var c=null;for(var i=0;i<companies.length;i++){if(companies[i].id===id){c=companies[i];break;}}if(!c)return;
   var hist=c.history?c.history.slice():[];
   hist.push({stage:document.getElementById('newHistStage').value,date:document.getElementById('newHistDate').value});
   dealsRef.doc(id).update({history:hist});
-  openDetail(id);
+  /* openDetail(id) 제거 — onSnapshot이 companies 갱신 후 자동으로 openDetail을 다시 호출함 */
 }
 function deleteHistory(id,idx){
   var c=null;for(var i=0;i<companies.length;i++){if(companies[i].id===id){c=companies[i];break;}}if(!c)return;
   var hist=c.history?c.history.slice():[];
   hist.splice(idx,1);
   dealsRef.doc(id).update({history:hist});
-  openDetail(id);
+  /* openDetail(id) 제거 — onSnapshot이 자동 갱신 */
 }
 
-/* ===== 칩 선택기 (담당자 복수선택) ===== */
+/* ===== 칩 선택기 ===== */
 function renderChipSelect(containerId,selected){
-  var el=document.getElementById(containerId);
-  if(!el)return;
+  var el=document.getElementById(containerId);if(!el)return;
   var sel=selected?selected.slice():[];
   el.className='chip-dropdown';
   function render(){
@@ -621,7 +579,7 @@ function renderChipSelect(containerId,selected){
       var info=mgrInfo(sel[i]);
       chipHtml+='<span class="chip" style="background:'+info.bg+';color:'+info.fg+';">'+sel[i]+' <span class="chip-x" onclick="event.stopPropagation();removeChip(\''+containerId+'\',\''+sel[i]+'\')">✕</span></span>';
     }
-    if(sel.length===0) chipHtml+='<span style="color:#bbb;font-size:0.82rem;">클릭하여 선택</span>';
+    if(sel.length===0)chipHtml+='<span style="color:#bbb;font-size:0.82rem;">클릭하여 선택</span>';
     chipHtml+='</div>';
     chipHtml+='<div class="chip-menu" id="'+containerId+'Menu">';
     for(var i=0;i<managers.length;i++){
@@ -635,54 +593,36 @@ function renderChipSelect(containerId,selected){
   el._selected=sel;
   el._render=render;
 }
-function toggleChipMenu(containerId){
-  var menu=document.getElementById(containerId+'Menu');
-  if(menu) menu.classList.toggle('open');
-}
+function toggleChipMenu(containerId){var menu=document.getElementById(containerId+'Menu');if(menu)menu.classList.toggle('open');}
 function toggleChipItem(containerId,name){
-  var el=document.getElementById(containerId);
-  var sel=el._selected;
-  var idx=sel.indexOf(name);
-  if(idx>=0)sel.splice(idx,1);else sel.push(name);
+  var el=document.getElementById(containerId);var sel=el._selected;
+  var idx=sel.indexOf(name);if(idx>=0)sel.splice(idx,1);else sel.push(name);
   el._render();
 }
 function removeChip(containerId,name){
-  var el=document.getElementById(containerId);
-  var sel=el._selected;
-  var idx=sel.indexOf(name);
-  if(idx>=0)sel.splice(idx,1);
+  var el=document.getElementById(containerId);var sel=el._selected;
+  var idx=sel.indexOf(name);if(idx>=0)sel.splice(idx,1);
   el._render();
 }
-function getChipValues(containerId){
-  var el=document.getElementById(containerId);
-  return el&&el._selected?el._selected.slice():[];
-}
+function getChipValues(containerId){var el=document.getElementById(containerId);return el&&el._selected?el._selected.slice():[];}
 document.addEventListener('click',function(e){
   var menus=document.querySelectorAll('.chip-menu.open');
-  for(var i=0;i<menus.length;i++){
-    if(!menus[i].parentElement.contains(e.target)) menus[i].classList.remove('open');
-  }
+  for(var i=0;i<menus.length;i++){if(!menus[i].parentElement.contains(e.target))menus[i].classList.remove('open');}
 });
 
 /* ===== 담당자 관리 ===== */
 function openMgrModal(){document.getElementById('mgrModal').classList.add('active');renderMgrList();}
 function closeMgrModal(){document.getElementById('mgrModal').classList.remove('active');}
 function renderMgrList(){
-  var el=document.getElementById('mgrListArea');
-  if(!el)return;
+  var el=document.getElementById('mgrListArea');if(!el)return;
   if(managers.length===0){el.innerHTML='<div class="mgr-empty">등록된 담당자가 없습니다.</div>';return;}
   var h='<ul class="mgr-list">';
-  for(var i=0;i<managers.length;i++){
-    var m=managers[i];
-    h+='<li><span class="mgr-badge-lg" style="background:'+cbg(m.color)+';color:'+m.color+';">'+m.name+'</span><button class="mgr-del" onclick="deleteManager(\''+m.id+'\')">✕</button></li>';
-  }
+  for(var i=0;i<managers.length;i++){var m=managers[i];h+='<li><span class="mgr-badge-lg" style="background:'+cbg(m.color)+';color:'+m.color+';">'+m.name+'</span><button class="mgr-del" onclick="deleteManager(\''+m.id+'\')">✕</button></li>';}
   h+='</ul>';el.innerHTML=h;
 }
 function addManager(){
-  var name=document.getElementById('mgrNewName').value.trim();
-  if(!name){alert('이름을 입력하세요');return;}
-  var color=document.getElementById('mgrNewColor').value;
-  mgrsRef.add({name:name,color:color});
+  var name=document.getElementById('mgrNewName').value.trim();if(!name){alert('이름을 입력하세요');return;}
+  mgrsRef.add({name:name,color:document.getElementById('mgrNewColor').value});
   document.getElementById('mgrNewName').value='';
 }
 function deleteManager(id){if(confirm('삭제하시겠습니까?'))mgrsRef.doc(id).delete();}
@@ -691,22 +631,16 @@ function deleteManager(id){if(confirm('삭제하시겠습니까?'))mgrsRef.doc(i
 function openFundModal(){document.getElementById('fundModal').classList.add('active');renderFundList();}
 function closeFundModal(){document.getElementById('fundModal').classList.remove('active');}
 function renderFundList(){
-  var el=document.getElementById('fundListArea');
-  if(!el)return;
+  var el=document.getElementById('fundListArea');if(!el)return;
   if(funds.length===0){el.innerHTML='<div class="fund-empty">등록된 조합이 없습니다.</div>';return;}
   var h='<ul class="fund-list-ul">';
-  for(var i=0;i<funds.length;i++){
-    var f=funds[i];
-    h+='<li><div><span class="fund-badge-lg" style="background:'+cbg(f.color)+';color:'+f.color+';">'+f.short+'</span> <span style="font-size:0.82rem;color:#666;">'+f.name+'</span></div><button class="fund-del" onclick="deleteFund(\''+f.id+'\')">✕</button></li>';
-  }
+  for(var i=0;i<funds.length;i++){var f=funds[i];h+='<li><div><span class="fund-badge-lg" style="background:'+cbg(f.color)+';color:'+f.color+';">'+f.short+'</span> <span style="font-size:0.82rem;color:#666;">'+f.name+'</span></div><button class="fund-del" onclick="deleteFund(\''+f.id+'\')">✕</button></li>';}
   h+='</ul>';el.innerHTML=h;
 }
 function addFund(){
-  var name=document.getElementById('fundNewName').value.trim();
-  var short2=document.getElementById('fundNewShort').value.trim();
+  var name=document.getElementById('fundNewName').value.trim();var short2=document.getElementById('fundNewShort').value.trim();
   if(!name||!short2){alert('정식명칭과 약칭을 모두 입력하세요');return;}
-  var color=document.getElementById('fundNewColor').value;
-  fundsRef.add({name:name,short:short2,color:color});
+  fundsRef.add({name:name,short:short2,color:document.getElementById('fundNewColor').value});
   document.getElementById('fundNewName').value='';document.getElementById('fundNewShort').value='';
 }
 function deleteFund(id){if(confirm('삭제하시겠습니까?'))fundsRef.doc(id).delete();}
@@ -731,14 +665,12 @@ function importJSON(e){
     try{
       var data=JSON.parse(ev.target.result);
       if(!confirm('기존 데이터를 모두 지우고 가져온 데이터로 교체합니다.\n계속하시겠습니까?'))return;
-      /* 기존 삭제 */
       var batch1=db.batch();
       companies.forEach(function(c){batch1.delete(dealsRef.doc(c.id));});
       managers.forEach(function(m){batch1.delete(mgrsRef.doc(m.id));});
       funds.forEach(function(f){batch1.delete(fundsRef.doc(f.id));});
       completedDeals.forEach(function(d){batch1.delete(completedRef.doc(d.id));});
       batch1.commit().then(function(){
-        /* 새로 추가 */
         if(data.companies)data.companies.forEach(function(c){dealsRef.add(c);});
         if(data.managers)data.managers.forEach(function(m){mgrsRef.add(m);});
         if(data.funds)data.funds.forEach(function(f){fundsRef.add(f);});
@@ -747,8 +679,7 @@ function importJSON(e){
       });
     }catch(err){alert('JSON 파일 오류: '+err.message);}
   };
-  reader.readAsText(file);
-  e.target.value='';
+  reader.readAsText(file);e.target.value='';
 }
 </script>
 </body>
