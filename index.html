@@ -175,7 +175,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
     </div>
   </div>
   <div class="summary-grid">
-    <div class="summary-card"><div class="label">검토 기업 수</div><div class="value" id="sumCount">0</div><div class="sub">전체 파이프라인</div></div>
+    <div class="summary-card"><div class="label">조합별 잔액</div><div id="fundBalanceArea" style="margin-top:4px;"></div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div><div class="fund-breakdown" id="fundBreakdown"></div><div id="fundDetailArea"></div></div>
     <div class="summary-card"><div class="label">담당자별 현황</div><div id="mgrBreakdown" style="margin-top:4px;"></div><div id="mgrDetailArea"></div></div>
     <div class="summary-card"><div class="label">투자완료 포트폴리오</div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div><button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="openCompletedAddModal()">+ 투자완료 기록</button></div>
@@ -250,7 +250,7 @@ mgrsRef.orderBy('name').onSnapshot(function(s){
 });
 fundsRef.orderBy('name').onSnapshot(function(s){
   funds=[];
-  s.forEach(function(d){funds.push({id:d.id,name:d.data().name,short:d.data().short,color:d.data().color});});
+  s.forEach(function(d){funds.push({id:d.id,name:d.data().name,short:d.data().short,color:d.data().color,balance:d.data().balance||0});});
   renderFundList();renderAll();
 });
 completedRef.orderBy('date','desc').onSnapshot(function(s){
@@ -287,7 +287,21 @@ var openMgrDetail=null;
 
 /* ===== 요약 카드 ===== */
 function renderSummary(){
-  document.getElementById('sumCount').textContent=companies.length+'개사';
+  var balEl=document.getElementById('fundBalanceArea');
+if(funds.length>0){
+  var bh='';
+  for(var fi=0;fi<funds.length;fi++){
+    var f=funds[fi];
+    var bal=f.balance||0;
+    var used=0;
+    for(var ci=0;ci<companies.length;ci++){var c=companies[ci];if(c.fundAllocs){for(var ai=0;ai<c.fundAllocs.length;ai++){if(c.fundAllocs[ai].fund===f.name)used+=(c.fundAllocs[ai].amount||0);}}}
+    var compUsed=0;
+    for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name)compUsed+=completedDeals[ci].amount;}
+    var remain=bal-used-compUsed;
+    bh+='<div class="fund-row"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(remain<0?'color:#d32f2f;':'')+'">'+remain+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+bal+'억</span></span></div>';
+  }
+  balEl.innerHTML=bh;
+}else{balEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">조합을 등록하세요</span>';}
   var total=0;for(var i=0;i<companies.length;i++)total+=getTotalAmt(companies[i]);
   document.getElementById('sumAmount').textContent=total+'억';
   document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
@@ -738,11 +752,28 @@ function closeFundModal(){document.getElementById('fundModal').classList.remove(
 function renderFundList(){
   var el=document.getElementById('fundListArea');if(!el)return;
   if(funds.length===0){el.innerHTML='<div class="fund-empty">등록된 조합이 없습니다.</div>';return;}
-  var h='<ul class="fund-list-ul">';for(var i=0;i<funds.length;i++){var f=funds[i];h+='<li><div><span class="fund-badge-lg" style="background:'+cbg(f.color)+';color:'+f.color+';">'+f.short+'</span> <span style="font-size:0.82rem;color:#666;">'+f.name+'</span></div><button class="fund-del" onclick="deleteFund(\''+f.id+'\')">✕</button></li>';}
+  var h='<ul class="fund-list-ul">';
+  for(var i=0;i<funds.length;i++){
+    var f=funds[i];
+    h+='<li style="flex-wrap:wrap;gap:8px;"><div style="display:flex;align-items:center;gap:8px;flex:1;"><span class="fund-badge-lg" style="background:'+cbg(f.color)+';color:'+f.color+';">'+f.short+'</span> <span style="font-size:0.82rem;color:#666;">'+f.name+'</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;"><label style="font-size:0.75rem;color:#999;">조합 총액:</label><input type="number" value="'+(f.balance||0)+'" style="width:80px;padding:6px 8px;border:1.5px solid #ddd;border-radius:8px;font-size:0.82rem;" onchange="updateFundBalance(\''+f.id+'\',this.value)"><span style="font-size:0.78rem;color:#999;">억</span></div>';
+    h+='<button class="fund-del" onclick="deleteFund(\''+f.id+'\')">✕</button></li>';
+  }
   h+='</ul>';el.innerHTML=h;
 }
-function addFund(){var name=document.getElementById('fundNewName').value.trim();var short2=document.getElementById('fundNewShort').value.trim();if(!name||!short2){alert('정식명칭과 약칭을 모두 입력하세요');return;}fundsRef.add({name:name,short:short2,color:document.getElementById('fundNewColor').value});document.getElementById('fundNewName').value='';document.getElementById('fundNewShort').value='';}
+
+function addFund(){
+  var name=document.getElementById('fundNewName').value.trim();
+  var short2=document.getElementById('fundNewShort').value.trim();
+  if(!name||!short2){alert('정식명칭과 약칭을 모두 입력하세요');return;}
+  fundsRef.add({name:name,short:short2,color:document.getElementById('fundNewColor').value,balance:0});
+  document.getElementById('fundNewName').value='';document.getElementById('fundNewShort').value='';
+}
 function deleteFund(id){if(confirm('삭제하시겠습니까?'))fundsRef.doc(id).delete();}
+function updateFundBalance(id,val){
+  var amount=parseInt(val)||0;
+  fundsRef.doc(id).update({balance:amount});
+}
 
 /* ===== 내보내기/가져오기 ===== */
 function exportJSON(){
