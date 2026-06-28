@@ -47,7 +47,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .section-title{font-size:1rem;font-weight:700;}
 .section-hint{font-size:0.75rem;color:#bbb;}
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;min-height:200px;}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;min-height:200px;}
 .kanban-col{background:#fff;border-radius:14px;border:1px solid #eee;padding:14px 10px;display:flex;flex-direction:column;}
 .kanban-col-header{text-align:center;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:10px;}
 .kanban-col-header .col-title{font-size:0.88rem;font-weight:600;}
@@ -77,7 +77,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .badge-s1{background:#e3f2fd;color:#1565c0;}
 .badge-s2{background:#f3e5f5;color:#7b1fa2;}
 .badge-s3{background:#e8f5e9;color:#2e7d32;}
-.badge-s4{background:#fff3e0;color:#e65100;}
 .dday-badge{display:inline-block;padding:4px 8px;border-radius:8px;font-size:0.75rem;font-weight:700;min-width:36px;text-align:center;}
 .dday-urgent{background:#fee;color:#d32f2f;}
 .dday-normal{background:#e3f2fd;color:#1565c0;}
@@ -162,7 +161,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   <div class="top-bar">
     <div class="top-left">
       <h1>투자 파이프라인 현황판</h1>
-      <div class="subtitle">4단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</div>
+      <div class="subtitle">3단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</div>
       <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
     </div>
     <div class="top-right">
@@ -180,7 +179,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
     <div class="summary-card"><div class="label">담당자별 현황</div><div id="mgrBreakdown" style="margin-top:4px;"></div><div id="mgrDetailArea"></div></div>
     <div class="summary-card"><div class="label">투자완료 포트폴리오</div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div><button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="openCompletedAddModal()">+ 투자완료 기록</button></div>
   </div>
-  <div class="section-header"><div class="section-title">파이프라인 (4단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
+  <div class="section-header"><div class="section-title">파이프라인 (3단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
   <div class="kanban" id="kanbanBoard"></div>
   <div class="section-header"><div class="section-title">다음 마일스톤 (임박순)</div></div>
   <table class="milestone-table">
@@ -228,8 +227,8 @@ var mgrsRef=db.collection('managers');
 var fundsRef=db.collection('funds');
 var completedRef=db.collection('completedDeals');
 
-var STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회',s4:'투자계약'};
-var STAGE_KEYS=['s1','s2','s3','s4'];
+var STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회'};
+var STAGE_KEYS=['s1','s2','s3'];
 var COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
 var companies=[],managers=[],funds=[],completedDeals=[];
 var currentDetailId=null;
@@ -474,7 +473,7 @@ function renderKanban(){
     h+='<div class="kanban-col"><div class="kanban-col-header"><div class="col-title">'+STAGES[sk]+'</div><div class="col-stat">'+list.length+'개사 · '+amt+'억</div></div><div class="kanban-cards">';
     for(var i=0;i<list.length;i++){
       var c=list[i],cur=getCur(c),ci=sIdx(cur.stage),ed=cur.date?(cur.date.slice(5).replace('-','/')):'',ta=getTotalAmt(c);
-      var bar='<div class="kc-bar">';for(var j=0;j<4;j++){if(j<ci)bar+='<div class="seg seg-done"></div>';else if(j===ci)bar+='<div class="seg seg-current"></div>';else bar+='<div class="seg seg-future"></div>';}bar+='</div>';
+      var bar='<div class="kc-bar">';for(var j=0;j<3;j++){if(j<ci)bar+='<div class="seg seg-done"></div>';else if(j===ci)bar+='<div class="seg seg-current"></div>';else bar+='<div class="seg seg-future"></div>';}bar+='</div>';
       var fdHtml='';if(c.fundAllocs&&c.fundAllocs.length>0){fdHtml='<div class="kc-fund-detail">';for(var ai=0;ai<c.fundAllocs.length;ai++){var a=c.fundAllocs[ai],fii=fundInfo(a.fund);if(ai>0)fdHtml+=' / ';fdHtml+=fii.short+' '+a.amount+'억';}fdHtml+='</div>';}
       var fns=getFundNames(c),mns=getMgrNames(c);
       var fundLine='';if(fns.length>0){fundLine='<div class="kc-badges">';for(var fi2=0;fi2<fns.length;fi2++){var finfo=fundInfo(fns[fi2]);fundLine+=badgeS(finfo.short,finfo);}fundLine+='</div>';}
@@ -497,7 +496,7 @@ function renderMilestones(){
     var nd=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
     var dd=c.plannedNext&&c.plannedNext.date?ddayCalc(c.plannedNext.date):null;
     var ddH='';if(dd===null)ddH='<span class="dday-badge dday-none">미정</span>';else if(dd<0)ddH='<span class="dday-badge dday-urgent">D+'+Math.abs(dd)+'</span>';else if(dd<=7)ddH='<span class="dday-badge dday-urgent">D-'+dd+'</span>';else ddH='<span class="dday-badge dday-normal">D-'+dd+'</span>';
-    var dots='<div class="progress-dots">';for(var j=0;j<4;j++)dots+='<span class="'+(j<=ci?'active':'')+'"></span>';dots+='</div>';
+    var dots='<div class="progress-dots">';for(var j=0;j<3;j++)dots+='<span class="'+(j<=ci?'active':'')+'"></span>';dots+='</div>';
     var fns=getFundNames(c),mns=getMgrNames(c);
     var fB='';if(fns.length>0){for(var fi=0;fi<fns.length;fi++){var finfo=fundInfo(fns[fi]);fB+=badgeS(finfo.short,finfo)+' ';}}else fB='<span style="color:#ccc">-</span>';
     var mB='';if(mns.length>0){for(var mi=0;mi<mns.length;mi++)mB+=badgeS(mns[mi],mgrInfo(mns[mi]))+' ';}else mB='<span style="color:#ccc">-</span>';
