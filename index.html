@@ -148,6 +148,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .mgr-add-row input,.fund-add-row input{flex:1;min-width:100px;}
 .fund-add-row .fund-short{width:80px;flex:none;}
 .mgr-empty,.fund-empty{text-align:center;color:#999;font-size:0.85rem;padding:16px 0;}
+.cd-purpose-box{margin-bottom:12px;padding:12px;background:#fafafa;border-radius:10px;border:1px solid #eee;}
+.cd-purpose-box h4{font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;}
+.cd-purpose-opt{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;}
+.cd-purpose-opt input{width:16px;height:16px;cursor:pointer;}
+.cd-purpose-opt.disabled{opacity:0.4;cursor:not-allowed;}
+.cd-purpose-opt .pp-sub{font-size:0.72rem;color:#999;margin-left:2px;}
+.cd-purpose-none{font-size:0.78rem;color:#999;padding:4px 0;}
+.cd-purpose-hint{font-size:0.72rem;color:#bbb;margin-top:6px;}
+.purpose-detail{margin-top:8px;padding:10px;background:#fafafa;border-radius:10px;border:1px solid #eee;}
+.pp-row{margin-bottom:10px;}
+.pp-row:last-child{margin-bottom:0;}
+.pp-row-head{display:flex;justify-content:space-between;align-items:baseline;font-size:0.75rem;margin-bottom:3px;}
+.pp-row-head .pp-name{font-weight:600;color:#555;}
+.pp-row-head .pp-val{color:#666;}
+.pp-bar{height:7px;border-radius:4px;background:#e8e8e8;overflow:hidden;}
+.pp-bar .pp-fill{height:100%;border-radius:4px;}
+.pp-pct{font-size:0.7rem;font-weight:700;margin-left:6px;}
 @media(max-width:768px){
 .summary-grid{grid-template-columns:1fr 1fr;}
 .kanban{grid-template-columns:1fr;gap:8px;}
@@ -204,16 +221,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 </div></div>
 <div class="modal-overlay" id="completedAddModal">
 <div class="modal" style="max-width:480px;">
-  <h2>투자완료 기록 추가</h2>
+  <h2 id="cdModalTitle">투자완료 기록 추가</h2>
   <div class="form-group"><label>기업명</label><input id="cdCompany" placeholder="(주)기업명"></div>
   <div class="form-row">
-    <div class="form-group"><label>조합</label><select id="cdFund"></select></div>
+    <div class="form-group"><label>조합</label><select id="cdFund" onchange="renderCdPurposes()"></select></div>
     <div class="form-group"><label>투자금액 (억)</label><input id="cdAmount" type="number" placeholder="0"></div>
   </div>
   <div class="form-row">
     <div class="form-group"><label>완료일</label><input id="cdDate" type="date"></div>
     <div class="form-group"><label>담당자</label><select id="cdManager"><option value="">(선택)</option></select></div>
   </div>
+  <div id="cdPurposeArea"></div>
   <div class="form-group"><label>비고</label><input id="cdNote" placeholder="메모 (선택)"></div>
   <div class="form-actions"><button class="btn" onclick="closeCompletedAddModal()">취소</button><button class="btn btn-primary" onclick="saveCompletedDeal()">저장</button></div>
 </div></div>
@@ -230,6 +248,32 @@ var completedRef=db.collection('completedDeals');
 var STAGES={s1:'투자팀 IR',s2:'공식 IR',s3:'투자심의위원회'};
 var STAGE_KEYS=['s1','s2','s3'];
 var COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
+
+/* ===== 주목적 설정 (조합 약칭 기준) =====
+   gate:true  = 창업기업(이게 체크돼야 나머지 활성화, 풀면 하위 해제)
+   type:'must'= 최소 충족 목표(미달이 위험), type:'cap'= 상한(초과가 위험)
+   bonusFor   = 이 항목 체크 시 해당 키 목표 충족액에 1.2배 가산(에이아이 지방기업→창업기업)
+*/
+var PURPOSE_DEFS={
+  '오상':[
+    {key:'startup',label:'창업기업',target:213,type:'must',gate:true},
+    {key:'local',label:'지방기업',target:71,type:'must'},
+    {key:'old',label:'구주',target:71,type:'cap'}
+  ],
+  '에이아이':[
+    {key:'startup',label:'창업기업',target:450,type:'must',gate:true},
+    {key:'valuechain',label:'AI밸류체인',target:200,type:'must'},
+    {key:'local',label:'지방기업',target:0,type:'bonus',bonusFor:'startup',bonusRate:1.2},
+    {key:'old',label:'구주',target:150,type:'cap'}
+  ],
+  '문화':[
+    {key:'culture',label:'문화산업기업',target:300,type:'must',gate:true}
+  ]
+};
+function purposeDefsOf(fundShort){return PURPOSE_DEFS[fundShort]||[];}
+function gateKeyOf(defs){for(var i=0;i<defs.length;i++)if(defs[i].gate)return defs[i].key;return null;}
+function purposeLabel(fundShort,key){var defs=purposeDefsOf(fundShort);for(var i=0;i<defs.length;i++)if(defs[i].key===key)return defs[i].label;return key;}
+
 var companies=[],managers=[],funds=[],completedDeals=[];
 var currentDetailId=null;
 var tempHistory=[];
@@ -254,7 +298,7 @@ fundsRef.orderBy('name').onSnapshot(function(s){
 });
 completedRef.orderBy('date','desc').onSnapshot(function(s){
   completedDeals=[];
-  s.forEach(function(d){completedDeals.push({id:d.id,company:d.data().company||'',fund:d.data().fund||'',amount:d.data().amount||0,date:d.data().date||'',manager:d.data().manager||'',note:d.data().note||''});});
+  s.forEach(function(d){completedDeals.push({id:d.id,company:d.data().company||'',fund:d.data().fund||'',amount:d.data().amount||0,date:d.data().date||'',manager:d.data().manager||'',note:d.data().note||'',purposes:d.data().purposes||[]});});
   renderAll();
 });
 
@@ -283,6 +327,83 @@ function badgeS(label,info){return '<span class="badge-inline" style="background
 var openCompFund=null;
 var openFundDetail=null;
 var openMgrDetail=null;
+var openPurposeFund=null;
+
+/* ===== 주목적 충족도 ===== */
+function togglePurposeDetail(fundName){
+  if(openPurposeFund===fundName)openPurposeFund=null;else openPurposeFund=fundName;
+  renderSummary();
+}
+/* 조합별 주목적 달성액 계산.
+   - must: 해당 key가 체크된 완료건 금액 단순 합
+   - 에이아이 창업기업: (창업기업&지방X 합) + (창업기업&지방 합 ×1.2)
+   - cap(구주): 체크된 완료건 합 (상한=balance×20%)
+   - 비목적: purposes 비었거나 게이트 미체크인 완료건 금액 합 */
+function computePurpose(fund){
+  var fShort=fund.short;
+  var defs=purposeDefsOf(fShort);
+  var deals=[];
+  for(var i=0;i<completedDeals.length;i++)if(completedDeals[i].fund===fund.name)deals.push(completedDeals[i]);
+  var gateKey=gateKeyOf(defs);
+  var bonusKey=null,bonusRate=1,bonusTarget=null;
+  for(var i=0;i<defs.length;i++)if(defs[i].type==='bonus'){bonusKey=defs[i].key;bonusRate=defs[i].bonusRate||1;bonusTarget=defs[i].bonusFor;}
+  var result=[];   // {label,type,current,target,pct,over}
+  var nonAmt=0;
+  // 비목적: 게이트가 있으면 게이트 미체크건, 게이트 없으면 purposes 빈 건
+  for(var i=0;i<deals.length;i++){
+    var d=deals[i];var pp=d.purposes||[];
+    var isNon=false;
+    if(gateKey){if(pp.indexOf(gateKey)<0)isNon=true;}
+    else{if(pp.length===0)isNon=true;}
+    if(isNon)nonAmt+=d.amount;
+  }
+  for(var di=0;di<defs.length;di++){
+    var p=defs[di];
+    if(p.type==='bonus')continue; // bonus는 단독표시 안 함(창업기업에 가산)
+    var cur=0;
+    for(var i=0;i<deals.length;i++){
+      var d=deals[i];var pp=d.purposes||[];
+      if(pp.indexOf(p.key)<0)continue;
+      if(p.key===gateKey&&bonusKey&&bonusTarget===p.key){
+        // 게이트(창업기업)이면서 보너스 대상: 지방 체크 시 1.2배
+        if(pp.indexOf(bonusKey)>=0)cur+=d.amount*bonusRate;
+        else cur+=d.amount;
+      }else{
+        cur+=d.amount;
+      }
+    }
+    cur=Math.round(cur*10)/10;
+    if(p.type==='cap'){
+      var cap=Math.round((fund.balance||0)*0.2*10)/10;
+      var pct=cap>0?Math.round(cur/cap*100):0;
+      result.push({label:p.label,type:'cap',current:cur,target:cap,pct:pct,over:cur>cap});
+    }else{
+      var pct=p.target>0?Math.round(cur/p.target*100):0;
+      result.push({label:p.label,type:'must',current:cur,target:p.target,pct:pct,met:cur>=p.target,bonus:(p.key===gateKey&&bonusKey&&bonusTarget===p.key)});
+    }
+  }
+  return {items:result,nonAmt:Math.round(nonAmt*10)/10,hasDefs:defs.length>0};
+}
+function buildPurposeDetail(fund){
+  var cp=computePurpose(fund);
+  if(!cp.hasDefs)return '<div class="purpose-detail"><div class="cd-purpose-none">등록된 주목적이 없습니다.</div></div>';
+  var h='<div class="purpose-detail">';
+  for(var i=0;i<cp.items.length;i++){
+    var it=cp.items[i];
+    var barColor,pctColor,pctTxt=it.pct+'%';
+    if(it.type==='cap'){
+      barColor=it.over?'#d32f2f':'#3b82f6';pctColor=it.over?'#d32f2f':'#888';
+      h+='<div class="pp-row"><div class="pp-row-head"><span class="pp-name">'+it.label+' <span style="font-weight:400;color:#aaa;">상한 '+it.target+'억</span></span><span class="pp-val">'+it.current+'억<span class="pp-pct" style="color:'+pctColor+';">'+pctTxt+(it.over?' 초과!':'')+'</span></span></div><div class="pp-bar"><div class="pp-fill" style="width:'+Math.min(it.pct,100)+'%;background:'+barColor+';"></div></div></div>';
+    }else{
+      barColor=it.met?'#4ade80':'#f0ad4e';pctColor=it.met?'#2e7d32':'#e65100';
+      var lbl=it.label+(it.bonus?' <span style="font-weight:400;color:#aaa;">(지방 1.2배 반영)</span>':'');
+      h+='<div class="pp-row"><div class="pp-row-head"><span class="pp-name">'+lbl+' <span style="font-weight:400;color:#aaa;">목표 '+it.target+'억</span></span><span class="pp-val">'+it.current+'억<span class="pp-pct" style="color:'+pctColor+';">'+pctTxt+'</span></span></div><div class="pp-bar"><div class="pp-fill" style="width:'+Math.min(it.pct,100)+'%;background:'+barColor+';"></div></div></div>';
+    }
+  }
+  h+='<div class="pp-row"><div class="pp-row-head"><span class="pp-name" style="color:#999;">비목적</span><span class="pp-val" style="color:#999;">'+cp.nonAmt+'억</span></div></div>';
+  h+='</div>';
+  return h;
+}
 
 /* ===== 요약 카드 ===== */
 function renderSummary(){
@@ -297,7 +418,8 @@ if(funds.length>0){
     var compUsed=0;
     for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name)compUsed+=completedDeals[ci].amount;}
     var remain=bal-used-compUsed;
-    bh+='<div class="fund-row"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(remain<0?'color:#d32f2f;':'')+'">'+remain+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+bal+'억</span></span></div>';
+    bh+='<div class="fund-row fund-row-clickable" onclick="togglePurposeDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(remain<0?'color:#d32f2f;':'')+'">'+remain+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+bal+'억</span></span></div>';
+    if(openPurposeFund===f.name)bh+=buildPurposeDetail(f);
   }
   balEl.innerHTML=bh;
 }else{balEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">조합을 등록하세요</span>';}
@@ -436,28 +558,119 @@ function showCompletedDetail(fundName){
     else if(completedDeals[i].fund===fundName)filtered.push(completedDeals[i]);
   }
   if(filtered.length===0){cdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">기록 없음</div>';return;}
-  var h='<div class="detail-box"><table><thead><tr><th>완료일</th><th>기업명</th><th>금액</th><th>담당자</th><th>비고</th><th></th></tr></thead><tbody>';
+  var h='<div class="detail-box"><div style="font-size:0.68rem;color:#bbb;margin-bottom:4px;">행을 더블클릭하면 수정할 수 있습니다</div><table><thead><tr><th>완료일</th><th>기업명</th><th>금액</th><th>담당자</th><th>주목적</th><th></th></tr></thead><tbody>';
   for(var i=0;i<filtered.length;i++){
     var d=filtered[i];var mBadge=d.manager?badgeS(d.manager,mgrInfo(d.manager)):'<span style="color:#ccc">-</span>';
-    h+='<tr><td>'+d.date+'</td><td><strong>'+d.company+'</strong></td><td>'+d.amount+'억</td><td>'+mBadge+'</td><td>'+(d.note||'-')+'</td><td><button class="cd-del" onclick="deleteCompleted(\''+d.id+'\')">✕</button></td></tr>';
+    var ppTxt=purposeTagText(d);
+    h+='<tr ondblclick="openCompletedEditModal(\''+d.id+'\')" style="cursor:pointer;"><td>'+d.date+'</td><td><strong>'+d.company+'</strong></td><td>'+d.amount+'억</td><td>'+mBadge+'</td><td style="font-size:0.7rem;color:#666;">'+ppTxt+'</td><td><button class="cd-del" onclick="event.stopPropagation();deleteCompleted(\''+d.id+'\')">✕</button></td></tr>';
   }
   h+='</tbody></table></div>';
   cdArea.innerHTML=h;
 }
+function purposeTagText(d){
+  if(!d.purposes||d.purposes.length===0)return '<span style="color:#c0392b;">비목적</span>';
+  var fShort=d.fund?fundInfo(d.fund).short:'';
+  var arr=[];for(var i=0;i<d.purposes.length;i++)arr.push(purposeLabel(fShort,d.purposes[i]));
+  return arr.join(', ');
+}
 
-function openCompletedAddModal(){
+var cdEditingId=null;          // null이면 신규, 아니면 수정 모드
+var cdSelectedPurposes=[];     // 현재 모달에서 선택된 주목적 key 배열
+
+function cdFillSelects(){
   var fOpts='<option value="">(조합 선택)</option>';for(var i=0;i<funds.length;i++)fOpts+='<option value="'+funds[i].name+'">'+funds[i].short+' ('+funds[i].name+')</option>';
   document.getElementById('cdFund').innerHTML=fOpts;
   var mOpts='<option value="">(선택)</option>';for(var i=0;i<managers.length;i++)mOpts+='<option value="'+managers[i].name+'">'+managers[i].name+'</option>';
   document.getElementById('cdManager').innerHTML=mOpts;
+}
+
+function openCompletedAddModal(){
+  cdEditingId=null;cdSelectedPurposes=[];
+  cdFillSelects();
+  document.getElementById('cdModalTitle').textContent='투자완료 기록 추가';
   document.getElementById('cdCompany').value='';document.getElementById('cdAmount').value='';document.getElementById('cdDate').value=new Date().toISOString().slice(0,10);document.getElementById('cdNote').value='';
+  document.getElementById('cdFund').value='';document.getElementById('cdManager').value='';
+  renderCdPurposes();
   document.getElementById('completedAddModal').classList.add('active');
 }
-function closeCompletedAddModal(){document.getElementById('completedAddModal').classList.remove('active');}
+
+function openCompletedEditModal(id){
+  var d=null;for(var i=0;i<completedDeals.length;i++){if(completedDeals[i].id===id){d=completedDeals[i];break;}}if(!d)return;
+  cdEditingId=id;cdSelectedPurposes=d.purposes?d.purposes.slice():[];
+  cdFillSelects();
+  document.getElementById('cdModalTitle').textContent='투자완료 기록 수정';
+  document.getElementById('cdCompany').value=d.company||'';
+  document.getElementById('cdAmount').value=d.amount||'';
+  document.getElementById('cdDate').value=d.date||'';
+  document.getElementById('cdNote').value=d.note||'';
+  document.getElementById('cdFund').value=d.fund||'';
+  document.getElementById('cdManager').value=d.manager||'';
+  renderCdPurposes();
+  document.getElementById('completedAddModal').classList.add('active');
+}
+
+/* 조합 선택에 따라 주목적 체크 동적 렌더 (창업기업 게이트 적용) */
+function renderCdPurposes(){
+  var area=document.getElementById('cdPurposeArea');
+  var fundName=document.getElementById('cdFund').value;
+  if(!fundName){area.innerHTML='';return;}
+  var fShort=fundInfo(fundName).short;
+  var defs=purposeDefsOf(fShort);
+  if(defs.length===0){area.innerHTML='<div class="cd-purpose-box"><div class="cd-purpose-none">이 조합은 등록된 주목적이 없습니다.</div></div>';return;}
+  // 선택값에서 이 조합에 없는 key 정리
+  var validKeys={};for(var i=0;i<defs.length;i++)validKeys[defs[i].key]=true;
+  cdSelectedPurposes=cdSelectedPurposes.filter(function(k){return validKeys[k];});
+  var gateKey=gateKeyOf(defs);
+  var gateOn=gateKey?cdSelectedPurposes.indexOf(gateKey)>=0:true;
+  var h='<div class="cd-purpose-box"><h4>주목적 해당 여부</h4>';
+  for(var i=0;i<defs.length;i++){
+    var p=defs[i];
+    var isGate=p.gate;
+    var checked=cdSelectedPurposes.indexOf(p.key)>=0;
+    var disabled=(!isGate&&!gateOn);
+    var sub='';
+    if(p.type==='cap')sub='<span class="pp-sub">(상한 인정용)</span>';
+    else if(p.type==='bonus')sub='<span class="pp-sub">(체크 시 창업기업 1.2배 인정)</span>';
+    h+='<label class="cd-purpose-opt'+(disabled?' disabled':'')+'"><input type="checkbox" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="toggleCdPurpose(\''+p.key+'\')"> '+p.label+sub+'</label>';
+  }
+  if(gateKey){
+    var gateLabel=purposeLabel(fShort,gateKey);
+    h+='<div class="cd-purpose-hint">'+gateLabel+' 미체크 시 자동 비목적으로 집계됩니다.</div>';
+  }
+  h+='</div>';
+  area.innerHTML=h;
+}
+
+function toggleCdPurpose(key){
+  var fundName=document.getElementById('cdFund').value;
+  var fShort=fundInfo(fundName).short;
+  var defs=purposeDefsOf(fShort);
+  var gateKey=gateKeyOf(defs);
+  var idx=cdSelectedPurposes.indexOf(key);
+  if(idx>=0)cdSelectedPurposes.splice(idx,1);else cdSelectedPurposes.push(key);
+  // 게이트(창업기업) 풀면 하위 전부 해제
+  if(gateKey&&key===gateKey&&cdSelectedPurposes.indexOf(gateKey)<0){
+    cdSelectedPurposes=[];
+  }
+  renderCdPurposes();
+}
+
+function closeCompletedAddModal(){cdEditingId=null;cdSelectedPurposes=[];document.getElementById('completedAddModal').classList.remove('active');}
+
 function saveCompletedDeal(){
   var company=document.getElementById('cdCompany').value.trim();if(!company){alert('기업명을 입력하세요');return;}
   var amount=parseInt(document.getElementById('cdAmount').value)||0;if(amount<=0){alert('투자금액을 입력하세요');return;}
-  completedRef.add({company:company,fund:document.getElementById('cdFund').value,amount:amount,date:document.getElementById('cdDate').value,manager:document.getElementById('cdManager').value,note:document.getElementById('cdNote').value.trim()});
+  var payload={
+    company:company,
+    fund:document.getElementById('cdFund').value,
+    amount:amount,
+    date:document.getElementById('cdDate').value,
+    manager:document.getElementById('cdManager').value,
+    note:document.getElementById('cdNote').value.trim(),
+    purposes:cdSelectedPurposes.slice()
+  };
+  if(cdEditingId){completedRef.doc(cdEditingId).update(payload);}
+  else{completedRef.add(payload);}
   closeCompletedAddModal();
 }
 function deleteCompleted(id){if(confirm('이 투자완료 기록을 삭제하시겠습니까?')){completedRef.doc(id).delete();openCompFund=null;}}
