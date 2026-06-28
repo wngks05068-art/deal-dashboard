@@ -23,7 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:14px;}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:28px;}
 .summary-card{background:#fff;border-radius:14px;padding:18px 16px;border:1px solid #eee;}
-.summary-card .label{font-size:0.75rem;color:#999;margin-bottom:4px;}
+.summary-card .label{font-size:0.9rem;font-weight:700;color:#1a1a1a;margin-bottom:4px;}
 .summary-card .value{font-size:1.8rem;font-weight:700;}
 .summary-card .sub{font-size:0.72rem;color:#aaa;margin-top:2px;}
 .fund-breakdown{margin-top:10px;border-top:1px solid #f0f0f0;padding-top:8px;}
@@ -204,14 +204,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
       <button class="btn" onclick="exportJSON()">내보내기</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">가져오기</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-      <button class="btn btn-primary" onclick="openAddModal()">+ 기업 추가</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ 검토기업 추가</button>
     </div>
   </div>
   <div class="summary-grid">
     <div class="summary-card"><div class="label">조합별 잔액 <span style="color:#ccc;font-weight:400;">(잔여현금 / 납입 / 약정)</span></div><div id="fundBalanceArea" style="margin-top:4px;"></div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div><div class="fund-breakdown" id="fundBreakdown"></div><div id="fundDetailArea"></div></div>
     <div class="summary-card"><div class="label">담당자별 현황</div><div id="mgrBreakdown" style="margin-top:4px;"></div><div id="mgrDetailArea"></div></div>
-    <div class="summary-card"><div class="label">투자완료 포트폴리오</div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div><button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="openCompletedAddModal()">+ 투자완료 기록</button></div>
+    <div class="summary-card"><div class="label" style="display:flex;justify-content:space-between;align-items:center;">투자완료 포트폴리오 <button class="btn btn-sm btn-primary" style="font-weight:600;" onclick="openCompletedAddModal()">+ 완료기업 추가</button></div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div></div>
   </div>
   <div class="section-header"><div class="section-title">파이프라인 (3단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
   <div class="kanban" id="kanbanBoard"></div>
@@ -608,18 +608,18 @@ function showMgrDetail(mgrName){
   for(var i=0;i<completedDeals.length;i++){if(completedDeals[i].manager===mgrName){compList.push(completedDeals[i]);}}
   if(progList.length===0&&compList.length===0){mdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">해당 담당자 기업 없음</div>';return;}
   var h='<div class="detail-box">';
-  if(progList.length>0){
-    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;">진행중</div><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
-    for(var i=0;i<progList.length;i++){var c=progList[i];h+='<tr><td><strong>'+c.name+'</strong></td><td>'+getTotalAmt(c)+'억</td><td>'+STAGES[getCur(c).stage]+'</td></tr>';}
-    h+='</tbody></table>';
-  }
   if(compList.length>0){
-    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;margin-top:8px;">투자완료</div><table><thead><tr><th>기업명</th><th>조합</th><th>금액</th><th>완료일</th></tr></thead><tbody>';
+    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;">투자완료</div><table><thead><tr><th>기업명</th><th>조합</th><th>금액</th><th>완료일</th></tr></thead><tbody>';
     for(var i=0;i<compList.length;i++){
       var d=compList[i];
       var fShort=d.fund?fundInfo(d.fund).short:'-';
       h+='<tr><td><strong>'+d.company+'</strong></td><td>'+fShort+'</td><td>'+d.amount+'억</td><td>'+d.date+'</td></tr>';
     }
+    h+='</tbody></table>';
+  }
+  if(progList.length>0){
+    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;'+(compList.length>0?'margin-top:8px;':'')+'">검토중</div><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
+    for(var i=0;i<progList.length;i++){var c=progList[i];h+='<tr><td><strong>'+c.name+'</strong></td><td>'+getTotalAmt(c)+'억</td><td>'+STAGES[getCur(c).stage]+'</td></tr>';}
     h+='</tbody></table>';
   }
   h+='</div>';
