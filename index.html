@@ -453,7 +453,7 @@ if(funds.length>0){
     var compUsed=0;
     for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name)compUsed+=completedDeals[ci].amount;}
     var cash=paidIn-used-compUsed;  // 잔여현금(납입 기준)
-    bh+='<div class="fund-row fund-row-clickable" onclick="togglePurposeDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(cash<0?'color:#d32f2f;':'')+'">'+cash+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+paidIn+' / '+commitment+'억</span></span></div>';
+    bh+='<div class="fund-row fund-row-clickable" onclick="togglePurposeDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(cash<0?'color:#d32f2f;':'')+'">'+cash+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+paidIn+'억 / '+commitment+'억</span></span></div>';
     if(openPurposeFund===f.name)bh+=buildPurposeDetail(f);
   }
   balEl.innerHTML=bh;
