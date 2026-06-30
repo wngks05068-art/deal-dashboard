@@ -187,12 +187,13 @@ body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystem
 .pp-list-row .pp-li-amt{font-weight:700;color:#1a1a1a;}
 .pp-list-row .pp-li-sub{color:#aaa;font-size:0.7rem;min-width:64px;text-align:right;}
 .pp-row:last-child{margin-bottom:0;}
-.pp-row-head{display:flex;justify-content:space-between;align-items:baseline;font-size:0.75rem;margin-bottom:3px;}
-.pp-row-head .pp-name{font-weight:600;color:#555;}
-.pp-row-head .pp-val{color:#666;}
-.pp-bar{height:7px;border-radius:4px;background:#e8e8e8;overflow:hidden;display:flex;}
+.pp-row-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:0.75rem;margin-bottom:4px;flex-wrap:nowrap;}
+.pp-row-head .pp-name{font-weight:600;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pp-row-head .pp-val{color:#666;white-space:nowrap;flex-shrink:0;}
+.pp-bar{position:relative;height:16px;border-radius:5px;background:#e8e8e8;overflow:hidden;display:flex;}
 .pp-bar .pp-fill{height:100%;}
-.pp-bar .pp-fill:first-child{border-top-left-radius:4px;border-bottom-left-radius:4px;}
+.pp-bar .pp-fill:first-child{border-top-left-radius:5px;border-bottom-left-radius:5px;}
+.pp-bar .pp-bar-pct{position:absolute;top:0;right:7px;height:16px;line-height:16px;font-size:0.66rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;white-space:nowrap;z-index:2;}
 .pp-pct{font-size:0.7rem;font-weight:700;margin-left:6px;}
 @media(max-width:768px){
 .summary-grid{grid-template-columns:1fr 1fr;}
@@ -219,9 +220,9 @@ body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystem
     </div>
   </div>
   <div class="summary-grid">
+    <div class="summary-card"><div class="label">담당자별 현황 <span style="color:var(--ink-3);font-weight:400;font-size:0.66rem;" id="sumMgrProgSub"></span></div><div class="fund-breakdown" id="mgrBreakdown" style="margin-top:2px;border-top:none;padding-top:0;"></div><div id="mgrDetailArea"></div></div>
     <div class="summary-card"><div class="label">조합별 잔여현금 <span style="color:var(--ink-3);font-weight:400;font-size:0.66rem;">잔여 / 납입 / 약정</span></div><div class="fund-breakdown" id="fundBalanceArea" style="margin-top:2px;border-top:none;padding-top:0;"></div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div><div class="fund-breakdown" id="fundBreakdown"></div><div id="fundDetailArea"></div></div>
-    <div class="summary-card"><div class="label">담당자별 현황 <span style="color:var(--ink-3);font-weight:400;font-size:0.66rem;" id="sumMgrProgSub"></span></div><div class="fund-breakdown" id="mgrBreakdown" style="margin-top:2px;border-top:none;padding-top:0;"></div><div id="mgrDetailArea"></div></div>
     <div class="summary-card"><div class="label" style="display:flex;justify-content:space-between;align-items:center;">투자완료 포트폴리오 <button class="btn btn-sm btn-primary" style="font-weight:600;" onclick="openCompletedAddModal()">+ 완료기업 추가</button></div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div></div>
   </div>
   <div class="section-header"><div class="section-title">파이프라인 (3단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
@@ -443,13 +444,17 @@ function buildPurposeDetail(fund){
       var doneColor=it.doneOver?'var(--warn)':'var(--navy)';
       var planColor=it.totalOver?'var(--warn)':'var(--plan)';
       var warn=it.totalOver?' <span style="color:var(--warn);font-weight:800;">상한초과</span>':'';
-      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+it.label+' <span style="font-weight:400;color:var(--ink-3);">상한 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+warn+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:'+planColor+';"></div></div></div>';
+      var capPctTxt=it.donePct+'%'+(it.plan>0?' → '+it.totalPct+'%':'');
+      var capPctColor=(doneW+planW)>=86?'#fff':'var(--navy)';
+      var capPct='<span class="pp-bar-pct" style="color:'+capPctColor+';">'+capPctTxt+'</span>';
+      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+it.label+' <span style="font-weight:400;color:var(--ink-3);">상한 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+warn+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:'+planColor+';"></div>'+capPct+'</div></div>';
     }else{
       var doneColor=it.met?'var(--ok)':'var(--navy)';
-      var lbl=it.label+(it.bonus?' <span style="font-weight:400;color:var(--ink-3);">(지방 1.2배)</span>':'');
-      var doneTxt='<span style="color:'+(it.met?'var(--ok)':'var(--navy)')+';font-weight:800;">'+it.donePct+'%</span>';
-      var totTxt=it.plan>0?' <span style="color:var(--navy-mid);">→ '+it.totalPct+'%</span>':'';
-      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+lbl+' <span style="font-weight:400;color:var(--ink-3);">목표 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+' '+doneTxt+totTxt+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:var(--plan);"></div></div></div>';
+      var lbl=it.label;
+      var pctTxt=it.donePct+'%'+(it.plan>0?' → '+it.totalPct+'%':'');
+      var pctColor=(doneW+planW)>=86?'#fff':(it.met?'var(--ok)':'var(--navy)');
+      var pctSpan='<span class="pp-bar-pct" style="color:'+pctColor+';">'+pctTxt+'</span>';
+      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+lbl+' <span style="font-weight:400;color:var(--ink-3);">목표 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:var(--plan);"></div>'+pctSpan+'</div></div>';
     }
     if(opened)h+=buildPurposeItemList(fund,it.key);
   }
@@ -522,27 +527,24 @@ if(funds.length>0){
   document.getElementById('sumAmount').textContent=total+'억';
   document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
 
-  /* 투자 예정 총액 - 조합별 (클릭 가능) */
+  /* 투자 예정 총액 - 조합별 (클릭 가능, 행 바로 아래 펼침) */
   var fbEl=document.getElementById('fundBreakdown');
-  var fdArea=document.getElementById('fundDetailArea');
   if(funds.length>0){
     var h='';
     for(var fi=0;fi<funds.length;fi++){
       var f=funds[fi],amt=0;
       for(var ci=0;ci<companies.length;ci++){var c=companies[ci];if(c.fundAllocs){for(var ai=0;ai<c.fundAllocs.length;ai++){if(c.fundAllocs[ai].fund===f.name)amt+=(c.fundAllocs[ai].amount||0);}}}
       h+='<div class="fund-row fund-row-clickable" onclick="toggleFundDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt">'+amt+'억</span></div>';
+      if(openFundDetail===f.name)h+=buildFundDetail(f.name);
     }
     var unAmt=0;
     for(var ci=0;ci<companies.length;ci++){var c=companies[ci];if(!c.fundAllocs||c.fundAllocs.length===0){unAmt+=(c.amount||0);}else{for(var ai=0;ai<c.fundAllocs.length;ai++){if(!c.fundAllocs[ai].fund)unAmt+=(c.fundAllocs[ai].amount||0);}}}
     if(unAmt>0)h+='<div class="fund-row"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unAmt+'억</span></div>';
     fbEl.innerHTML=h;
   }else{fbEl.innerHTML='';}
-  fdArea.innerHTML='';
-  if(openFundDetail!==null)showFundDetail(openFundDetail);
 
-  /* 담당자별 현황 - 진행/완료 두 줄 (클릭 가능) */
+  /* 담당자별 현황 - 진행/완료 두 줄 (클릭 가능, 행 바로 아래 펼침) */
   var mbEl=document.getElementById('mgrBreakdown');
-  var mdArea=document.getElementById('mgrDetailArea');
   if(managers.length>0){
     var mh='';
     for(var mi=0;mi<managers.length;mi++){
@@ -553,7 +555,9 @@ if(funds.length>0){
       mh+='<div class="mgr-row-group"><div class="mgr-row-header" onclick="toggleMgrDetail(\''+m.name+'\')">';
       mh+=badgeS(m.name,mgrGray(mi));
       mh+='<span class="mgr-row-fig num">진행 '+pAmt+'억 · 완료 '+cAmt+'억</span>';
-      mh+='</div><div class="mgr-sub-line num"><span>진행 '+pCnt+'건</span><span>완료 '+cCnt+'건</span></div></div>';
+      mh+='</div><div class="mgr-sub-line num"><span>진행 '+pCnt+'건</span><span>완료 '+cCnt+'건</span></div>';
+      if(openMgrDetail===m.name)mh+=buildMgrDetail(m.name);
+      mh+='</div>';
     }
     var noMgrCnt=0,noMgrAmt=0;
     for(var ci=0;ci<companies.length;ci++){if(getMgrNames(companies[ci]).length===0){noMgrCnt++;noMgrAmt+=getTotalAmt(companies[ci]);}}
@@ -561,39 +565,33 @@ if(funds.length>0){
     mbEl.innerHTML=mh;
   }else{mbEl.innerHTML='<span style="color:var(--ink-3);font-size:0.75rem;">담당자를 등록하세요</span>';}
   var subEl=document.getElementById('sumMgrProgSub');if(subEl)subEl.textContent='진행 '+companies.length+'개사 · 완료 '+completedDeals.length+'건';
-  mdArea.innerHTML='';
-  if(openMgrDetail!==null)showMgrDetail(openMgrDetail);
 
   /* 투자완료 포트폴리오 */
   var totalComp=0;for(var i=0;i<completedDeals.length;i++)totalComp+=completedDeals[i].amount;
   document.getElementById('sumCompleted').textContent=totalComp+'억';
   document.getElementById('sumCompletedSub').textContent=completedDeals.length+'건 완료';
   var cbEl=document.getElementById('completedBreakdown');
-  var cdArea=document.getElementById('completedDetailArea');
   if(funds.length>0){
     var ch='';
     for(var fi=0;fi<funds.length;fi++){
       var f=funds[fi],cAmt2=0,cCnt2=0;
       for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name){cAmt2+=completedDeals[ci].amount;cCnt2++;}}
       ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\''+f.name+'\')" data-fund="'+f.name+'"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt">'+cAmt2+'억 ('+cCnt2+'건)</span></div>';
+      if(openCompFund===f.name)ch+=buildCompletedDetail(f.name);
     }
     var unCAmt=0,unCCnt=0;
     for(var ci=0;ci<completedDeals.length;ci++){if(!completedDeals[ci].fund){unCAmt+=completedDeals[ci].amount;unCCnt++;}}
-    if(unCAmt>0)ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\'\')"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unCAmt+'억 ('+unCCnt+'건)</span></div>';
+    if(unCAmt>0){ch+='<div class="fund-row fund-row-clickable" onclick="toggleCompletedDetail(\'\')"><span class="fund-name" style="color:#bbb;">미지정</span><span class="fund-amt" style="color:#bbb;">'+unCAmt+'억 ('+unCCnt+'건)</span></div>';if(openCompFund==='')ch+=buildCompletedDetail('');}
     cbEl.innerHTML=ch;
   }else{cbEl.innerHTML='';}
-  cdArea.innerHTML='';
-  if(openCompFund!==null)showCompletedDetail(openCompFund);
 }
 
 /* ===== 투자 예정 총액 - 조합별 기업 리스트 토글 ===== */
 function toggleFundDetail(fundName){
-  if(openFundDetail===fundName){openFundDetail=null;document.getElementById('fundDetailArea').innerHTML='';return;}
-  openFundDetail=fundName;
-  showFundDetail(fundName);
+  if(openFundDetail===fundName)openFundDetail=null;else openFundDetail=fundName;
+  renderSummary();
 }
-function showFundDetail(fundName){
-  var fdArea=document.getElementById('fundDetailArea');
+function buildFundDetail(fundName){
   var filtered=[];
   for(var i=0;i<companies.length;i++){
     var c=companies[i];
@@ -603,25 +601,23 @@ function showFundDetail(fundName){
       }
     }
   }
-  if(filtered.length===0){fdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">해당 조합 기업 없음</div>';return;}
+  if(filtered.length===0)return '<div class="detail-box" style="text-align:center;color:#999;">해당 조합 기업 없음</div>';
   var h='<div class="detail-box"><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
   for(var i=0;i<filtered.length;i++){var d=filtered[i];h+='<tr><td><strong>'+d.name+'</strong></td><td>'+d.amount+'억</td><td>'+d.stage+'</td></tr>';}
   h+='</tbody></table></div>';
-  fdArea.innerHTML=h;
+  return h;
 }
 
 /* ===== 담당자별 현황 - 기업 리스트 토글 ===== */
 function toggleMgrDetail(mgrName){
-  if(openMgrDetail===mgrName){openMgrDetail=null;document.getElementById('mgrDetailArea').innerHTML='';return;}
-  openMgrDetail=mgrName;
-  showMgrDetail(mgrName);
+  if(openMgrDetail===mgrName)openMgrDetail=null;else openMgrDetail=mgrName;
+  renderSummary();
 }
-function showMgrDetail(mgrName){
-  var mdArea=document.getElementById('mgrDetailArea');
+function buildMgrDetail(mgrName){
   var progList=[],compList=[];
   for(var i=0;i<companies.length;i++){if(getMgrNames(companies[i]).indexOf(mgrName)>=0){progList.push(companies[i]);}}
   for(var i=0;i<completedDeals.length;i++){if(completedDeals[i].manager===mgrName){compList.push(completedDeals[i]);}}
-  if(progList.length===0&&compList.length===0){mdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">해당 담당자 기업 없음</div>';return;}
+  if(progList.length===0&&compList.length===0)return '<div class="detail-box" style="text-align:center;color:#999;">해당 담당자 기업 없음</div>';
   var h='<div class="detail-box">';
   if(progList.length>0){
     h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;">검토중</div><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
@@ -638,23 +634,21 @@ function showMgrDetail(mgrName){
     h+='</tbody></table>';
   }
   h+='</div>';
-  mdArea.innerHTML=h;
+  return h;
 }
 
 /* ===== 투자완료 포트폴리오 - 조합별 리스트 토글 ===== */
 function toggleCompletedDetail(fundName){
-  if(openCompFund===fundName){openCompFund=null;document.getElementById('completedDetailArea').innerHTML='';return;}
-  openCompFund=fundName;
-  showCompletedDetail(fundName);
+  if(openCompFund===fundName)openCompFund=null;else openCompFund=fundName;
+  renderSummary();
 }
-function showCompletedDetail(fundName){
-  var cdArea=document.getElementById('completedDetailArea');
+function buildCompletedDetail(fundName){
   var filtered=[];
   for(var i=0;i<completedDeals.length;i++){
     if(fundName===''&&!completedDeals[i].fund)filtered.push(completedDeals[i]);
     else if(completedDeals[i].fund===fundName)filtered.push(completedDeals[i]);
   }
-  if(filtered.length===0){cdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">기록 없음</div>';return;}
+  if(filtered.length===0)return '<div class="detail-box" style="text-align:center;color:#999;">기록 없음</div>';
   var h='<div class="detail-box"><div style="font-size:0.68rem;color:#bbb;margin-bottom:4px;">행을 더블클릭하면 수정할 수 있습니다</div><table><thead><tr><th>완료일</th><th>기업명</th><th>금액</th><th>담당자</th><th>주목적</th><th></th></tr></thead><tbody>';
   for(var i=0;i<filtered.length;i++){
     var d=filtered[i];var mBadge=d.manager?badgeS(d.manager,mgrInfo(d.manager)):'<span style="color:#ccc">-</span>';
@@ -662,7 +656,7 @@ function showCompletedDetail(fundName){
     h+='<tr ondblclick="openCompletedEditModal(\''+d.id+'\')" style="cursor:pointer;"><td>'+d.date+'</td><td><strong>'+d.company+'</strong></td><td>'+d.amount+'억</td><td>'+mBadge+'</td><td style="font-size:0.7rem;color:#666;">'+ppTxt+'</td><td><button class="cd-del" onclick="event.stopPropagation();deleteCompleted(\''+d.id+'\')">✕</button></td></tr>';
   }
   h+='</tbody></table></div>';
-  cdArea.innerHTML=h;
+  return h;
 }
 function purposeTagText(d){
   if(!d.purposes||d.purposes.length===0)return '<span style="color:#c0392b;">비목적</span>';
@@ -727,7 +721,7 @@ function renderCdPurposes(){
     var disabled=(!isGate&&!gateOn);
     var sub='';
     if(p.type==='cap')sub='<span class="pp-sub">(상한 인정용)</span>';
-    else if(p.type==='bonus')sub='<span class="pp-sub">(체크 시 창업기업 1.2배 인정)</span>';
+    else if(p.type==='bonus')sub='<span class="pp-sub">(체크 시 주목적 1.2배 적용)</span>';
     h+='<label class="cd-purpose-opt'+(disabled?' disabled':'')+'"><input type="checkbox" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="toggleCdPurpose(\''+p.key+'\')"> '+p.label+sub+'</label>';
   }
   if(gateKey){
@@ -784,10 +778,9 @@ function renderKanban(){
     for(var i=0;i<list.length;i++){
       var c=list[i],cur=getCur(c),ci=sIdx(cur.stage),ed=cur.date?(cur.date.slice(5).replace('-','/')):'',ta=getTotalAmt(c);
       var fns=getFundNames(c),mns=getMgrNames(c);
-      // 조합 배지에 금액 포함 (텍스트 중복 제거)
+      // 조합 배지는 약칭만 (금액은 상단 총액으로 충분)
       var fundLine='';
-      if(c.fundAllocs&&c.fundAllocs.length>0){fundLine='<div class="kc-badges">';for(var ai=0;ai<c.fundAllocs.length;ai++){var a=c.fundAllocs[ai];if(!a.fund)continue;var fii=fundInfo(a.fund);fundLine+=badgeS(fii.short+' '+a.amount+'억',fii);}fundLine+='</div>';}
-      else if(fns.length>0){fundLine='<div class="kc-badges">';for(var fi2=0;fi2<fns.length;fi2++){var finfo=fundInfo(fns[fi2]);fundLine+=badgeS(finfo.short,finfo);}fundLine+='</div>';}
+      if(fns.length>0){fundLine='<div class="kc-badges">';for(var fi2=0;fi2<fns.length;fi2++){var finfo=fundInfo(fns[fi2]);fundLine+=badgeS(finfo.short,finfo);}fundLine+='</div>';}
       var mgrLine='';if(mns.length>0){mgrLine='<div class="kc-badges" style="margin-top:5px;">';for(var mi2=0;mi2<mns.length;mi2++){mgrLine+=badgeS(mns[mi2],mgrInfo(mns[mi2]));}mgrLine+='</div>';}
       h+='<div class="kanban-card" onclick="openDetail(\''+c.id+'\')"><div class="kc-top"><span class="kc-name">'+c.name+'</span><span class="kc-amount num">'+ta+'억</span></div><div class="kc-date">완료 '+ed+'</div>'+fundLine+mgrLine+'</div>';
     }
@@ -929,7 +922,7 @@ function renderRowPurposes(rowId){
   var h='<span class="app-lbl">주목적:</span>';
   for(var i=0;i<defs.length;i++){
     var p=defs[i];var checked=sel.indexOf(p.key)>=0;var disabled=(!p.gate&&!gateOn);
-    var sub='';if(p.type==='cap')sub=' <span style="color:#bbb;">(상한)</span>';else if(p.type==='bonus')sub=' <span style="color:#bbb;">(1.2배)</span>';
+    var sub='';if(p.type==='cap')sub=' <span style="color:#bbb;">(상한)</span>';else if(p.type==='bonus')sub=' <span style="color:#bbb;">(주목적 1.2배 적용)</span>';
     h+='<label class="'+(disabled?'disabled':'')+'"><input type="checkbox" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="toggleAllocPurpose(\''+rowId+'\',\''+p.key+'\')">'+p.label+sub+'</label>';
   }
   ppEl.innerHTML=h;
