@@ -280,7 +280,7 @@ var STAGE_KEYS=['s1','s2','s3'];
 var COLOR_BG={'#2e7d32':'#e8f5e9','#1565c0':'#e3f2fd','#e65100':'#fff3e0','#7b1fa2':'#f3e5f5','#c62828':'#fce4ec','#00695c':'#e0f2f1'};
 
 /* ===== 주목적 설정 (조합 약칭 기준) =====
-   gate:true  = 창업기업(이게 체크돼야 나머지 활성화, 풀면 하위 해제)
+   gate:true  = 게이트 항목(하나라도 체크돼야 비게이트 항목 활성화, 모두 풀면 하위 해제)
    type:'must'= 최소 충족 목표(미달이 위험), type:'cap'= 상한(초과가 위험)
    bonusFor   = 이 항목 체크 시 해당 키 목표 충족액에 1.2배 가산(에이아이 지방기업→창업기업)
 */
@@ -292,7 +292,7 @@ var PURPOSE_DEFS={
   ],
   '에이아이':[
     {key:'startup',label:'창업기업',target:450,type:'must',gate:true},
-    {key:'valuechain',label:'AI밸류체인',target:200,type:'must'},
+    {key:'valuechain',label:'AI밸류체인',target:200,type:'must',gate:true},
     {key:'local',label:'지방기업',target:0,type:'bonus',bonusFor:'startup',bonusRate:1.2},
     {key:'old',label:'구주',target:150,type:'cap'}
   ],
@@ -304,7 +304,8 @@ function purposeDefsOf(fundShort){return PURPOSE_DEFS[fundShort]||[];}
 /* 비목적 상한 (조합 약칭 기준, 억). 완료+검토 합이 이 값을 넘으면 경고 */
 var NON_PURPOSE_CAP={'문화':300,'오상':142,'에이아이':300};
 function nonCapOf(fundShort){return NON_PURPOSE_CAP[fundShort]!=null?NON_PURPOSE_CAP[fundShort]:0;}
-function gateKeyOf(defs){for(var i=0;i<defs.length;i++)if(defs[i].gate)return defs[i].key;return null;}
+function gateKeysOf(defs){var r=[];for(var i=0;i<defs.length;i++)if(defs[i].gate)r.push(defs[i].key);return r;}
+function anyGateOn(defs,sel){var gks=gateKeysOf(defs);if(gks.length===0)return true;for(var i=0;i<gks.length;i++)if(sel.indexOf(gks[i])>=0)return true;return false;}
 function purposeLabel(fundShort,key){var defs=purposeDefsOf(fundShort);for(var i=0;i<defs.length;i++)if(defs[i].key===key)return defs[i].label;return key;}
 
 var companies=[],managers=[],funds=[],completedDeals=[];
@@ -388,16 +389,17 @@ function togglePurposeDetail(fundName){
    - 비목적: 게이트 미체크(또는 purposes 빈) 금액 합 */
 function purposeAccum(defs,unit){
   // unit: {amount, purposes:[]} 하나에 대해 각 key별 기여액 + 비목적 여부 계산
-  var gateKey=gateKeyOf(defs);
+  var gks=gateKeysOf(defs);
   var bonusKey=null,bonusRate=1,bonusTarget=null;
   for(var i=0;i<defs.length;i++)if(defs[i].type==='bonus'){bonusKey=defs[i].key;bonusRate=defs[i].bonusRate||1;bonusTarget=defs[i].bonusFor;}
   var pp=unit.purposes||[];var amt=unit.amount||0;
   var perKey={};var isNon=false;
-  if(gateKey){if(pp.indexOf(gateKey)<0)isNon=true;}else{if(pp.length===0)isNon=true;}
+  if(gks.length>0){isNon=!anyGateOn(defs,pp);}else{if(pp.length===0)isNon=true;}
   for(var di=0;di<defs.length;di++){
     var p=defs[di];if(p.type==='bonus')continue;
     if(pp.indexOf(p.key)<0)continue;
-    if(p.key===gateKey&&bonusKey&&bonusTarget===p.key&&pp.indexOf(bonusKey)>=0)perKey[p.key]=amt*bonusRate;
+    // 보너스 대상(창업기업)에 지방 동시체크 시 1.2배
+    if(bonusKey&&bonusTarget===p.key&&pp.indexOf(bonusKey)>=0)perKey[p.key]=amt*bonusRate;
     else perKey[p.key]=amt;
   }
   return {perKey:perKey,isNon:isNon,amt:amt};
@@ -428,7 +430,6 @@ function computePurpose(fund){
     }
   }
   // 보너스(지방) 표시용: 창업기업 항목에 bonus 플래그
-  var gateKey=gateKeyOf(defs);
   for(var i=0;i<defs.length;i++)if(defs[i].type==='bonus'&&defs[i].bonusFor){for(var j=0;j<result.length;j++)if(result[j].label===purposeLabel(fShort,defs[i].bonusFor))result[j].bonus=true;}
   return {items:result,nonDone:rnd(nonDone),nonPlan:rnd(nonPlan),hasDefs:true};
 }
@@ -491,11 +492,11 @@ function togglePurposeItem(fundName,key){
 /* 특정 (조합,주목적key)에 해당하는 완료/검토중 기업 리스트.
    key='__non__'이면 비목적(게이트 미체크) 건 */
 function buildPurposeItemList(fund,key){
-  var defs=purposeDefsOf(fund.short);var gateKey=gateKeyOf(defs);
+  var defs=purposeDefsOf(fund.short);var gks=gateKeysOf(defs);
   var isNonKey=(key==='__non__');
   function hit(purposes){
     var pp=purposes||[];
-    if(isNonKey){if(gateKey)return pp.indexOf(gateKey)<0;return pp.length===0;}
+    if(isNonKey){if(gks.length>0)return !anyGateOn(defs,pp);return pp.length===0;}
     return pp.indexOf(key)>=0;
   }
   // 완료
@@ -727,8 +728,8 @@ function renderCdPurposes(){
   // 선택값에서 이 조합에 없는 key 정리
   var validKeys={};for(var i=0;i<defs.length;i++)validKeys[defs[i].key]=true;
   cdSelectedPurposes=cdSelectedPurposes.filter(function(k){return validKeys[k];});
-  var gateKey=gateKeyOf(defs);
-  var gateOn=gateKey?cdSelectedPurposes.indexOf(gateKey)>=0:true;
+  var gks=gateKeysOf(defs);
+  var gateOn=anyGateOn(defs,cdSelectedPurposes);
   var h='<div class="cd-purpose-box"><h4>주목적 해당 여부</h4>';
   for(var i=0;i<defs.length;i++){
     var p=defs[i];
@@ -740,9 +741,9 @@ function renderCdPurposes(){
     else if(p.type==='bonus')sub='<span class="pp-sub">(체크 시 주목적 1.2배 적용)</span>';
     h+='<label class="cd-purpose-opt'+(disabled?' disabled':'')+'"><input type="checkbox" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="toggleCdPurpose(\''+p.key+'\')"> '+p.label+sub+'</label>';
   }
-  if(gateKey){
-    var gateLabel=purposeLabel(fShort,gateKey);
-    h+='<div class="cd-purpose-hint">'+gateLabel+' 미체크 시 자동 비목적으로 집계됩니다.</div>';
+  if(gks.length>0){
+    var gns=[];for(var i=0;i<gks.length;i++)gns.push(purposeLabel(fShort,gks[i]));
+    h+='<div class="cd-purpose-hint">'+gns.join(' 또는 ')+' 미체크 시 자동 비목적으로 집계됩니다.</div>';
   }
   h+='</div>';
   area.innerHTML=h;
@@ -752,12 +753,13 @@ function toggleCdPurpose(key){
   var fundName=document.getElementById('cdFund').value;
   var fShort=fundInfo(fundName).short;
   var defs=purposeDefsOf(fShort);
-  var gateKey=gateKeyOf(defs);
   var idx=cdSelectedPurposes.indexOf(key);
   if(idx>=0)cdSelectedPurposes.splice(idx,1);else cdSelectedPurposes.push(key);
-  // 게이트(창업기업) 풀면 하위 전부 해제
-  if(gateKey&&key===gateKey&&cdSelectedPurposes.indexOf(gateKey)<0){
-    cdSelectedPurposes=[];
+  // 게이트가 하나도 안 남으면 하위(지방·구주) 전부 해제
+  if(!anyGateOn(defs,cdSelectedPurposes)){
+    var gks=gateKeysOf(defs);var keep=[];
+    for(var i=0;i<cdSelectedPurposes.length;i++)if(gks.indexOf(cdSelectedPurposes[i])>=0)keep.push(cdSelectedPurposes[i]);
+    cdSelectedPurposes=keep;
   }
   renderCdPurposes();
 }
@@ -934,7 +936,7 @@ function renderRowPurposes(rowId){
   var sel=allocPurposes[rowId]||[];
   var validKeys={};for(var i=0;i<defs.length;i++)validKeys[defs[i].key]=true;
   allocPurposes[rowId]=sel=sel.filter(function(k){return validKeys[k];});
-  var gateKey=gateKeyOf(defs);var gateOn=gateKey?sel.indexOf(gateKey)>=0:true;
+  var gateOn=anyGateOn(defs,sel);
   var h='<span class="app-lbl">주목적:</span>';
   for(var i=0;i<defs.length;i++){
     var p=defs[i];var checked=sel.indexOf(p.key)>=0;var disabled=(!p.gate&&!gateOn);
@@ -945,10 +947,10 @@ function renderRowPurposes(rowId){
 }
 function toggleAllocPurpose(rowId,key){
   var row=document.getElementById(rowId);var fundName=row.querySelector('.alloc-fund').value;
-  var defs=purposeDefsOf(fundInfo(fundName).short);var gateKey=gateKeyOf(defs);
+  var defs=purposeDefsOf(fundInfo(fundName).short);
   var sel=allocPurposes[rowId]||[];var idx=sel.indexOf(key);
   if(idx>=0)sel.splice(idx,1);else sel.push(key);
-  if(gateKey&&key===gateKey&&sel.indexOf(gateKey)<0)sel=[];
+  if(!anyGateOn(defs,sel)){var gks=gateKeysOf(defs);var keep=[];for(var i=0;i<sel.length;i++)if(gks.indexOf(sel[i])>=0)keep.push(sel[i]);sel=keep;}
   allocPurposes[rowId]=sel;renderRowPurposes(rowId);
 }
 function readAllocRows(containerSel){
