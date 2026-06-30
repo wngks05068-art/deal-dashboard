@@ -301,6 +301,9 @@ var PURPOSE_DEFS={
   ]
 };
 function purposeDefsOf(fundShort){return PURPOSE_DEFS[fundShort]||[];}
+/* 비목적 상한 (조합 약칭 기준, 억). 완료+검토 합이 이 값을 넘으면 경고 */
+var NON_PURPOSE_CAP={'문화':300,'오상':142,'에이아이':300};
+function nonCapOf(fundShort){return NON_PURPOSE_CAP[fundShort]!=null?NON_PURPOSE_CAP[fundShort]:0;}
 function gateKeyOf(defs){for(var i=0;i<defs.length;i++)if(defs[i].gate)return defs[i].key;return null;}
 function purposeLabel(fundShort,key){var defs=purposeDefsOf(fundShort);for(var i=0;i<defs.length;i++)if(defs[i].key===key)return defs[i].label;return key;}
 
@@ -458,10 +461,23 @@ function buildPurposeDetail(fund){
     }
     if(opened)h+=buildPurposeItemList(fund,it.key);
   }
-  // 비목적 (클릭 가능)
+  // 비목적 (클릭 가능, 상한 막대)
   var nonOpened=(openPurposeItem===fund.name+'::__non__');
-  var nonTxt='완료 '+cp.nonDone+'억'+(cp.nonPlan>0?' · 검토 '+cp.nonPlan+'억':'');
-  h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\'__non__\')"><div class="pp-row-head"><span class="pp-name" style="color:var(--ink-3);">'+(nonOpened?'▾ ':'▸ ')+'비목적</span><span class="pp-val num" style="color:var(--ink-3);">'+nonTxt+'</span></div></div>';
+  var nonCap=nonCapOf(fund.short);
+  var nonDenom=nonCap>0?nonCap:1;
+  var nonDoneW=Math.max(0,Math.min(100,cp.nonDone/nonDenom*100));
+  var nonPlanW=Math.max(0,Math.min(100-nonDoneW,cp.nonPlan/nonDenom*100));
+  var nonDoneOver=cp.nonDone>nonCap;
+  var nonTotalOver=(cp.nonDone+cp.nonPlan)>nonCap;
+  var nonDoneColor=nonDoneOver?'var(--warn)':'var(--navy)';
+  var nonPlanColor=nonTotalOver?'var(--warn)':'var(--plan)';
+  var nonDonePct=nonCap>0?Math.round(cp.nonDone/nonCap*100):0;
+  var nonTotalPct=nonCap>0?Math.round((cp.nonDone+cp.nonPlan)/nonCap*100):0;
+  var nonWarn=nonTotalOver?' <span style="color:var(--warn);font-weight:800;">상한초과</span>':'';
+  var nonPctTxt=nonDonePct+'%'+(cp.nonPlan>0?' → '+nonTotalPct+'%':'');
+  var nonPctColor=(nonDoneW+nonPlanW)>=86?'#fff':'var(--navy)';
+  var nonPctSpan='<span class="pp-bar-pct" style="color:'+nonPctColor+';">'+nonPctTxt+'</span>';
+  h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\'__non__\')"><div class="pp-row-head"><span class="pp-name">'+(nonOpened?'▾ ':'▸ ')+'비목적 <span style="font-weight:400;color:var(--ink-3);">상한 '+nonCap+'억</span></span><span class="pp-val num">완료 '+cp.nonDone+'억'+(cp.nonPlan>0?' · 검토 '+cp.nonPlan+'억':'')+nonWarn+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+nonDoneW+'%;background:'+nonDoneColor+';"></div><div class="pp-fill" style="width:'+nonPlanW+'%;background:'+nonPlanColor+';"></div>'+nonPctSpan+'</div></div>';
   if(nonOpened)h+=buildPurposeItemList(fund,'__non__');
   h+='<div style="font-size:0.66rem;color:var(--ink-3);margin-top:6px;"><span style="display:inline-block;width:8px;height:8px;background:var(--navy);border-radius:2px;vertical-align:middle;"></span> 완료 &nbsp; <span style="display:inline-block;width:8px;height:8px;background:var(--plan);border-radius:2px;vertical-align:middle;"></span> 검토중</div>';
   h+='</div>';
