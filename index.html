@@ -4,29 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>투자 파이프라인 현황판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f5f5f0;color:#1a1a1a;line-height:1.6;}
-.container{max-width:96vw;width:100%;margin:0 auto;padding:20px 2vw 40px;}
-.top-bar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
-.top-left h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
-.top-left .subtitle{font-size:0.82rem;color:#888;}
-.top-left .meta-row{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:#999;margin-top:6px;}
-.meta-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;}
+:root{
+  --navy:#1a237e; --navy-mid:#3949ab; --navy-tint:#e8eaf6;
+  --page:#f4f4f1; --card:#ffffff; --line:#ececec; --line-soft:#f3f3f1;
+  --ink:#16181d; --ink-2:#5b606b; --ink-3:#9aa0aa;
+  --ok:#15803d; --ok-bg:#e7f3ec; --warn:#c0392b; --warn-bg:#fbeceb; --plan:#5b9bff; --plan-bg:#e8f1ff;
+  --r:14px; --r-sm:10px;
+}
+body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:var(--page);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+.container{max-width:1320px;width:96vw;margin:0 auto;padding:28px 0 56px;}
+.top-bar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid var(--navy);}
+.top-left h1{font-size:1.55rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:5px;color:var(--navy);}
+.top-left .subtitle{font-size:0.82rem;color:var(--ink-2);}
+.top-left .meta-row{display:flex;align-items:center;gap:8px;font-size:0.76rem;color:var(--ink-3);margin-top:7px;}
+.meta-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;}
 .top-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.btn{padding:8px 16px;border-radius:20px;border:1.5px solid #ddd;background:#fff;font-size:0.82rem;cursor:pointer;font-weight:500;transition:all .2s;}
-.btn:hover{background:#f0f0f0;}
-.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
-.btn-primary:hover{background:#333;}
-.btn-danger{color:#d32f2f;border-color:#d32f2f;background:#fff;}
-.btn-danger:hover{background:#fef0f0;}
-.btn-sm{padding:5px 12px;font-size:0.78rem;border-radius:14px;}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:28px;}
-.summary-card{background:#fff;border-radius:14px;padding:18px 16px;border:1px solid #eee;}
-.summary-card .label{font-size:0.9rem;font-weight:700;color:#1a1a1a;margin-bottom:4px;}
-.summary-card .value{font-size:1.8rem;font-weight:700;}
-.summary-card .sub{font-size:0.72rem;color:#aaa;margin-top:2px;}
-.fund-breakdown{margin-top:10px;border-top:1px solid #f0f0f0;padding-top:8px;}
+.btn{padding:8px 15px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);font-size:0.82rem;cursor:pointer;font-weight:600;color:var(--ink-2);transition:all .15s;}
+.btn:hover{background:#f6f6f4;border-color:#dcdcdc;}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn-primary:hover{background:#252d8f;border-color:#252d8f;}
+.btn-danger{color:var(--warn);border-color:#e3b9b6;background:#fff;}
+.btn-danger:hover{background:var(--warn-bg);}
+.btn-sm{padding:5px 11px;font-size:0.76rem;border-radius:8px;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:34px;}
+.summary-card{background:var(--card);border-radius:var(--r);padding:18px 18px 16px;border:1px solid var(--line);display:flex;flex-direction:column;}
+.summary-card .label{font-size:0.7rem;font-weight:700;color:var(--navy);margin-bottom:10px;letter-spacing:0.04em;text-transform:none;display:flex;justify-content:space-between;align-items:center;min-height:24px;}
+.summary-card .value{font-family:'Pretendard','Pretendard Variable',-apple-system,sans-serif;font-size:1.85rem;font-weight:700;letter-spacing:-0.01em;color:var(--ink);line-height:1.1;}
+.summary-card .sub{font-size:0.72rem;color:var(--ink-3);margin-top:3px;}
+.fund-breakdown{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:10px;}
 .fund-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:0.75rem;}
 .fund-row .fund-name{color:#666;font-weight:500;}
 .fund-row .fund-amt{font-weight:700;color:#1a1a1a;}
@@ -38,52 +51,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .detail-box td{padding:4px 6px;border-bottom:1px solid #f5f5f5;font-size:0.75rem;}
 .detail-box .cd-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.7rem;}
 .detail-box .cd-del:hover{color:#d32f2f;}
-.mgr-row-group{margin-bottom:6px;border-bottom:1px solid #f0f0f0;padding-bottom:6px;}
+.mgr-row-group{margin-bottom:8px;border-bottom:1px solid var(--line-soft);padding-bottom:8px;}
 .mgr-row-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-.mgr-row-header{display:flex;align-items:center;gap:6px;cursor:pointer;border-radius:6px;padding:3px 4px;margin:0 -4px;}
-.mgr-row-header:hover{background:#f5f5f5;}
-.mgr-sub-line{font-size:0.7rem;color:#888;margin-left:4px;margin-top:1px;}
+.mgr-row-header{display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:7px;padding:4px 6px;margin:0 -6px;}
+.mgr-row-header:hover{background:#f6f6f4;}
+.mgr-row-fig{margin-left:auto;font-size:0.74rem;font-weight:700;color:var(--ink);}
+.mgr-sub-line{font-size:0.68rem;color:var(--ink-3);margin-left:6px;margin-top:2px;}
 .mgr-sub-line span{margin-right:10px;}
-.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.section-title{font-size:1rem;font-weight:700;}
-.section-hint{font-size:0.75rem;color:#bbb;}
-.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;min-height:200px;}
-.kanban-col{background:#fff;border-radius:14px;border:1px solid #eee;padding:14px 10px;display:flex;flex-direction:column;}
-.kanban-col-header{text-align:center;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:10px;}
-.kanban-col-header .col-title{font-size:0.88rem;font-weight:600;}
-.kanban-col-header .col-stat{font-size:0.75rem;color:#999;margin-top:2px;}
-.kanban-cards{flex:1;display:flex;flex-direction:column;gap:8px;}
-.kanban-card{background:#fafafa;border-radius:10px;padding:12px;cursor:pointer;transition:box-shadow .2s;border:1px solid #f0f0f0;}
-.kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);background:#f5f5f5;}
-.kc-name{font-size:0.88rem;font-weight:700;margin-bottom:2px;}
-.kc-sector{font-size:0.72rem;color:#999;}
-.kc-amount{font-size:0.95rem;font-weight:700;margin:4px 0;}
-.kc-fund-detail{font-size:0.68rem;color:#888;margin-bottom:4px;}
-.kc-date{font-size:0.72rem;color:#aaa;margin-bottom:6px;}
-.kc-bar{height:5px;border-radius:3px;background:#eee;display:flex;overflow:hidden;gap:1px;margin-bottom:6px;}
+.section-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;}
+.section-title{font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.01em;position:relative;padding-left:12px;}
+.section-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:14px;background:var(--navy);border-radius:2px;}
+.section-hint{font-size:0.74rem;color:var(--ink-3);}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:34px;min-height:200px;}
+.kanban-col{background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;}
+.kanban-col-header{text-align:left;padding-bottom:11px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;}
+.kanban-col-header .col-title{font-size:0.84rem;font-weight:700;color:var(--ink);}
+.kanban-col-header .col-stat{font-size:0.73rem;color:var(--ink-3);margin-top:2px;}
+.kanban-cards{flex:1;display:flex;flex-direction:column;gap:9px;}
+.kanban-card{background:#fbfbfa;border-radius:var(--r-sm);padding:13px;cursor:pointer;transition:all .15s;border:1px solid var(--line-soft);}
+.kanban-card:hover{box-shadow:0 4px 14px rgba(26,35,126,0.08);border-color:var(--navy-tint);}
+.kc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px;}
+.kc-name{font-size:0.88rem;font-weight:700;color:var(--ink);}
+.kc-amount{font-size:0.92rem;font-weight:800;color:var(--ink);white-space:nowrap;}
+.kc-fund-detail{font-size:0.68rem;color:var(--ink-3);margin-bottom:7px;}
+.kc-date{font-size:0.7rem;color:var(--ink-3);margin-bottom:7px;}
+.kc-bar{height:5px;border-radius:3px;background:#ededed;display:flex;overflow:hidden;gap:2px;margin-bottom:8px;}
 .kc-bar .seg{height:100%;border-radius:3px;flex:1;}
-.seg-done{background:#4ade80;}
-.seg-current{background:#3b82f6;}
-.seg-future{background:#e0e0e0;}
-.kc-badges{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:2px;}
-.badge-inline{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:600;}
-.milestone-table{width:100%;border-collapse:collapse;margin-bottom:28px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;}
+.seg-done{background:var(--navy);}
+.seg-current{background:var(--navy-mid);}
+.seg-future{background:#e3e3e3;}
+.kc-badges{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.badge-inline{display:inline-block;padding:2px 9px;border-radius:9px;font-size:0.68rem;font-weight:700;}
+.milestone-table{width:100%;border-collapse:collapse;margin-bottom:34px;background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);}
 .milestone-table thead{background:#fafafa;}
-.milestone-table th{padding:12px 10px;font-size:0.75rem;color:#999;font-weight:500;text-align:left;border-bottom:1px solid #eee;}
-.milestone-table td{padding:12px 10px;font-size:0.82rem;border-bottom:1px solid #f5f5f5;vertical-align:middle;cursor:pointer;}
+.milestone-table th{padding:12px 12px;font-size:0.7rem;color:var(--ink-3);font-weight:700;text-align:left;border-bottom:1px solid var(--line);letter-spacing:0.02em;}
+.milestone-table td{padding:12px 12px;font-size:0.82rem;border-bottom:1px solid var(--line-soft);vertical-align:middle;cursor:pointer;color:var(--ink);}
 .milestone-table tr:last-child td{border-bottom:none;}
-.milestone-table tbody tr:hover{background:#fafafa;}
-.stage-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;}
-.badge-s1{background:#e3f2fd;color:#1565c0;}
-.badge-s2{background:#f3e5f5;color:#7b1fa2;}
-.badge-s3{background:#e8f5e9;color:#2e7d32;}
-.dday-badge{display:inline-block;padding:4px 8px;border-radius:8px;font-size:0.75rem;font-weight:700;min-width:36px;text-align:center;}
-.dday-urgent{background:#fee;color:#d32f2f;}
-.dday-normal{background:#e3f2fd;color:#1565c0;}
-.dday-none{background:#f5f5f5;color:#999;}
+.milestone-table tbody tr:hover{background:#fafbfd;}
+.stage-badge{display:inline-block;padding:3px 9px;border-radius:6px;font-size:0.7rem;font-weight:700;background:var(--navy-tint);color:var(--navy);}
+.dday-badge{display:inline-block;padding:4px 9px;border-radius:7px;font-size:0.74rem;font-weight:800;min-width:38px;text-align:center;}
+.dday-urgent{background:var(--warn-bg);color:var(--warn);}
+.dday-normal{background:var(--navy-tint);color:var(--navy);}
+.dday-none{background:#f1f1f1;color:var(--ink-3);}
 .progress-dots{display:flex;gap:3px;}
 .progress-dots span{width:8px;height:8px;border-radius:50%;background:#e0e0e0;}
-.progress-dots span.active{background:#4ade80;}
+.progress-dots span.active{background:var(--navy);}
 .footer-note{text-align:center;font-size:0.75rem;color:#bbb;padding:20px 0;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:1000;justify-content:center;align-items:center;}
 .modal-overlay.active{display:flex;}
@@ -94,7 +106,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
 .history-timeline{position:relative;padding-left:20px;}
 .history-timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e0e0e0;}
 .history-item{position:relative;padding:6px 0 6px 16px;display:flex;justify-content:space-between;align-items:center;}
-.history-item::before{content:'';position:absolute;left:-14px;top:12px;width:8px;height:8px;border-radius:50%;background:#4ade80;border:2px solid #fff;z-index:1;}
+.history-item::before{content:'';position:absolute;left:-14px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--navy);border:2px solid #fff;z-index:1;}
 .history-item .h-date{font-size:0.82rem;color:#999;min-width:90px;}
 .history-item .h-stage{font-size:0.85rem;font-weight:500;}
 .history-item .h-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.75rem;padding:2px 6px;}
@@ -195,7 +207,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
   <div class="top-bar">
     <div class="top-left">
       <h1>투자 파이프라인 현황판</h1>
-      <div class="subtitle">3단계 프로세스 · 단계별 진입 이력 추적 · 데이터는 Firebase에 실시간 저장됩니다</div>
       <div class="meta-row"><span class="meta-dot"></span> <span>실시간 동기화</span> · <span id="todayDate"></span></div>
     </div>
     <div class="top-right">
@@ -208,16 +219,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans
     </div>
   </div>
   <div class="summary-grid">
-    <div class="summary-card"><div class="label">조합별 잔액 <span style="color:#ccc;font-weight:400;">(잔여현금 / 납입 / 약정)</span></div><div id="fundBalanceArea" style="margin-top:4px;"></div></div>
+    <div class="summary-card"><div class="label">조합별 잔여현금 <span style="color:var(--ink-3);font-weight:400;font-size:0.66rem;">잔여 / 납입 / 약정</span></div><div class="fund-breakdown" id="fundBalanceArea" style="margin-top:2px;border-top:none;padding-top:0;"></div></div>
     <div class="summary-card"><div class="label">투자 예정 총액</div><div class="value" id="sumAmount">0억</div><div class="sub" id="sumAmountSub"></div><div class="fund-breakdown" id="fundBreakdown"></div><div id="fundDetailArea"></div></div>
-    <div class="summary-card"><div class="label">담당자별 현황</div><div id="mgrBreakdown" style="margin-top:4px;"></div><div id="mgrDetailArea"></div></div>
+    <div class="summary-card"><div class="label">담당자별 현황 <span style="color:var(--ink-3);font-weight:400;font-size:0.66rem;" id="sumMgrProgSub"></span></div><div class="fund-breakdown" id="mgrBreakdown" style="margin-top:2px;border-top:none;padding-top:0;"></div><div id="mgrDetailArea"></div></div>
     <div class="summary-card"><div class="label" style="display:flex;justify-content:space-between;align-items:center;">투자완료 포트폴리오 <button class="btn btn-sm btn-primary" style="font-weight:600;" onclick="openCompletedAddModal()">+ 완료기업 추가</button></div><div class="value" id="sumCompleted">0억</div><div class="sub" id="sumCompletedSub"></div><div class="fund-breakdown" id="completedBreakdown"></div><div id="completedDetailArea"></div></div>
   </div>
   <div class="section-header"><div class="section-title">파이프라인 (3단계)</div><div class="section-hint">카드 클릭 시 상세/이력 편집</div></div>
   <div class="kanban" id="kanbanBoard"></div>
   <div class="section-header"><div class="section-title">다음 마일스톤 (임박순)</div></div>
   <table class="milestone-table">
-    <thead><tr><th>기업명</th><th>조합</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th><th>진행률</th></tr></thead>
+    <thead><tr><th>기업명</th><th>담당자</th><th>현재 단계</th><th>금액</th><th>다음 예정</th><th>D-day</th></tr></thead>
     <tbody id="milestoneBody"></tbody>
   </table>
   <div class="footer-note">데이터는 Firebase에 실시간 저장됩니다. 모든 기기에서 동일한 데이터가 표시됩니다.</div>
@@ -429,25 +440,25 @@ function buildPurposeDetail(fund){
     var planW=Math.max(0,Math.min(100-doneW,it.plan/denom*100));
     var opened=(openPurposeItem===fund.name+'::'+it.key);
     if(it.type==='cap'){
-      var doneColor=it.doneOver?'#d32f2f':'#4ade80';
-      var planColor=it.totalOver?'#d32f2f':'#3b82f6';
-      var warn=it.totalOver?' <span style="color:#d32f2f;font-weight:700;">상한초과!</span>':'';
-      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+it.label+' <span style="font-weight:400;color:#aaa;">상한 '+it.target+'억</span></span><span class="pp-val">완료 '+it.done+'억'+(it.plan>0?' · 검토중 '+it.plan+'억':'')+warn+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:'+planColor+';"></div></div></div>';
+      var doneColor=it.doneOver?'var(--warn)':'var(--navy)';
+      var planColor=it.totalOver?'var(--warn)':'var(--plan)';
+      var warn=it.totalOver?' <span style="color:var(--warn);font-weight:800;">상한초과</span>':'';
+      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+it.label+' <span style="font-weight:400;color:var(--ink-3);">상한 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+warn+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:'+planColor+';"></div></div></div>';
     }else{
-      var doneColor=it.met?'#22c55e':'#4ade80';
-      var lbl=it.label+(it.bonus?' <span style="font-weight:400;color:#aaa;">(지방 1.2배 반영)</span>':'');
-      var doneTxt='<span style="color:'+(it.met?'#2e7d32':'#e65100')+';font-weight:700;">'+it.donePct+'%</span>';
-      var totTxt=it.plan>0?' <span style="color:#3b82f6;">→ '+it.totalPct+'%</span>':'';
-      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+lbl+' <span style="font-weight:400;color:#aaa;">목표 '+it.target+'억</span></span><span class="pp-val">완료 '+it.done+'억'+(it.plan>0?' · 검토중 '+it.plan+'억':'')+' '+doneTxt+totTxt+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:#3b82f6;"></div></div></div>';
+      var doneColor=it.met?'var(--ok)':'var(--navy)';
+      var lbl=it.label+(it.bonus?' <span style="font-weight:400;color:var(--ink-3);">(지방 1.2배)</span>':'');
+      var doneTxt='<span style="color:'+(it.met?'var(--ok)':'var(--navy)')+';font-weight:800;">'+it.donePct+'%</span>';
+      var totTxt=it.plan>0?' <span style="color:var(--navy-mid);">→ '+it.totalPct+'%</span>':'';
+      h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\''+it.key+'\')"><div class="pp-row-head"><span class="pp-name">'+(opened?'▾ ':'▸ ')+lbl+' <span style="font-weight:400;color:var(--ink-3);">목표 '+it.target+'억</span></span><span class="pp-val num">완료 '+it.done+'억'+(it.plan>0?' · 검토 '+it.plan+'억':'')+' '+doneTxt+totTxt+'</span></div><div class="pp-bar"><div class="pp-fill" style="width:'+doneW+'%;background:'+doneColor+';"></div><div class="pp-fill" style="width:'+planW+'%;background:var(--plan);"></div></div></div>';
     }
     if(opened)h+=buildPurposeItemList(fund,it.key);
   }
   // 비목적 (클릭 가능)
   var nonOpened=(openPurposeItem===fund.name+'::__non__');
-  var nonTxt='완료 '+cp.nonDone+'억'+(cp.nonPlan>0?' · 검토중 '+cp.nonPlan+'억':'');
-  h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\'__non__\')"><div class="pp-row-head"><span class="pp-name" style="color:#999;">'+(nonOpened?'▾ ':'▸ ')+'비목적</span><span class="pp-val" style="color:#999;">'+nonTxt+'</span></div></div>';
+  var nonTxt='완료 '+cp.nonDone+'억'+(cp.nonPlan>0?' · 검토 '+cp.nonPlan+'억':'');
+  h+='<div class="pp-row pp-clickable" onclick="togglePurposeItem(\''+fnJs+'\',\'__non__\')"><div class="pp-row-head"><span class="pp-name" style="color:var(--ink-3);">'+(nonOpened?'▾ ':'▸ ')+'비목적</span><span class="pp-val num" style="color:var(--ink-3);">'+nonTxt+'</span></div></div>';
   if(nonOpened)h+=buildPurposeItemList(fund,'__non__');
-  h+='<div style="font-size:0.66rem;color:#bbb;margin-top:4px;"><span style="display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:2px;"></span> 완료 &nbsp; <span style="display:inline-block;width:8px;height:8px;background:#3b82f6;border-radius:2px;"></span> 검토중</div>';
+  h+='<div style="font-size:0.66rem;color:var(--ink-3);margin-top:6px;"><span style="display:inline-block;width:8px;height:8px;background:var(--navy);border-radius:2px;vertical-align:middle;"></span> 완료 &nbsp; <span style="display:inline-block;width:8px;height:8px;background:var(--plan);border-radius:2px;vertical-align:middle;"></span> 검토중</div>';
   h+='</div>';
   return h;
 }
@@ -475,12 +486,12 @@ function buildPurposeItemList(fund,key){
   if(doneRows.length===0&&planRows.length===0)return '<div class="pp-list"><div style="color:#bbb;text-align:center;padding:6px;">해당 기업 없음</div></div>';
   var h='<div class="pp-list">';
   if(doneRows.length>0){
-    h+='<div class="pp-list-head" style="color:#2e7d32;">완료</div>';
-    for(var i=0;i<doneRows.length;i++){var r=doneRows[i];h+='<div class="pp-list-row"><span class="pp-li-name">'+r.name+'</span><span class="pp-li-amt">'+r.amount+'억</span><span class="pp-li-sub">'+(r.date||'')+'</span></div>';}
+    h+='<div class="pp-list-head" style="color:var(--ok);">완료</div>';
+    for(var i=0;i<doneRows.length;i++){var r=doneRows[i];h+='<div class="pp-list-row"><span class="pp-li-name">'+r.name+'</span><span class="pp-li-amt num">'+r.amount+'억</span><span class="pp-li-sub">'+(r.date||'')+'</span></div>';}
   }
   if(planRows.length>0){
-    h+='<div class="pp-list-head" style="color:#1565c0;margin-top:4px;">검토중</div>';
-    for(var i=0;i<planRows.length;i++){var r=planRows[i];h+='<div class="pp-list-row"><span class="pp-li-name">'+r.name+'</span><span class="pp-li-amt">'+r.amount+'억</span><span class="pp-li-sub">'+(r.stage||'')+'</span></div>';}
+    h+='<div class="pp-list-head" style="color:var(--plan);margin-top:6px;">검토중</div>';
+    for(var i=0;i<planRows.length;i++){var r=planRows[i];h+='<div class="pp-list-row"><span class="pp-li-name">'+r.name+'</span><span class="pp-li-amt num">'+r.amount+'억</span><span class="pp-li-sub">'+(r.stage||'')+'</span></div>';}
   }
   h+='</div>';
   return h;
@@ -489,6 +500,7 @@ function buildPurposeItemList(fund,key){
 /* ===== 요약 카드 ===== */
 function renderSummary(){
   var balEl=document.getElementById('fundBalanceArea');
+  var totCash=0;
 if(funds.length>0){
   var bh='';
   for(var fi=0;fi<funds.length;fi++){
@@ -500,11 +512,12 @@ if(funds.length>0){
     var compUsed=0;
     for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].fund===f.name)compUsed+=completedDeals[ci].amount;}
     var cash=paidIn-used-compUsed;  // 잔여현금(납입 기준)
-    bh+='<div class="fund-row fund-row-clickable" onclick="togglePurposeDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt" style="'+(cash<0?'color:#d32f2f;':'')+'">'+cash+'억 <span style="font-weight:400;color:#aaa;font-size:0.65rem;">/ '+paidIn+'억 / '+commitment+'억</span></span></div>';
+    totCash+=cash;
+    bh+='<div class="fund-row fund-row-clickable" onclick="togglePurposeDetail(\''+f.name+'\')"><span class="fund-name">'+badgeS(f.short,{bg:cbg(f.color),fg:f.color})+'</span><span class="fund-amt num" style="'+(cash<0?'color:var(--warn);':'')+'">'+cash+'억 <span style="font-weight:400;color:var(--ink-3);font-size:0.66rem;">/ '+paidIn+' / '+commitment+'</span></span></div>';
     if(openPurposeFund===f.name)bh+=buildPurposeDetail(f);
   }
   balEl.innerHTML=bh;
-}else{balEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">조합을 등록하세요</span>';}
+}else{balEl.innerHTML='<span style="color:var(--ink-3);font-size:0.75rem;">조합을 등록하세요</span>';}
   var total=0;for(var i=0;i<companies.length;i++)total+=getTotalAmt(companies[i]);
   document.getElementById('sumAmount').textContent=total+'억';
   document.getElementById('sumAmountSub').textContent=companies.length+'개사 합계';
@@ -539,13 +552,15 @@ if(funds.length>0){
       for(var ci=0;ci<completedDeals.length;ci++){if(completedDeals[ci].manager===m.name){cCnt++;cAmt+=completedDeals[ci].amount;}}
       mh+='<div class="mgr-row-group"><div class="mgr-row-header" onclick="toggleMgrDetail(\''+m.name+'\')">';
       mh+=badgeS(m.name,mgrGray(mi));
-      mh+='</div><div class="mgr-sub-line"><span>진행 '+pCnt+'건 · '+pAmt+'억</span><span>완료 '+cCnt+'건 · '+cAmt+'억</span></div></div>';
+      mh+='<span class="mgr-row-fig num">진행 '+pAmt+'억 · 완료 '+cAmt+'억</span>';
+      mh+='</div><div class="mgr-sub-line num"><span>진행 '+pCnt+'건</span><span>완료 '+cCnt+'건</span></div></div>';
     }
     var noMgrCnt=0,noMgrAmt=0;
     for(var ci=0;ci<companies.length;ci++){if(getMgrNames(companies[ci]).length===0){noMgrCnt++;noMgrAmt+=getTotalAmt(companies[ci]);}}
-    if(noMgrCnt>0)mh+='<div class="mgr-row-group"><div class="mgr-sub-line" style="color:#bbb;">미지정: 진행 '+noMgrCnt+'건 · '+noMgrAmt+'억</div></div>';
+    if(noMgrCnt>0)mh+='<div class="mgr-row-group"><div class="mgr-sub-line" style="color:var(--ink-3);">미지정 진행 '+noMgrCnt+'건 · '+noMgrAmt+'억</div></div>';
     mbEl.innerHTML=mh;
-  }else{mbEl.innerHTML='<span style="color:#bbb;font-size:0.75rem;">담당자를 등록하세요</span>';}
+  }else{mbEl.innerHTML='<span style="color:var(--ink-3);font-size:0.75rem;">담당자를 등록하세요</span>';}
+  var subEl=document.getElementById('sumMgrProgSub');if(subEl)subEl.textContent='진행 '+companies.length+'개사 · 완료 '+completedDeals.length+'건';
   mdArea.innerHTML='';
   if(openMgrDetail!==null)showMgrDetail(openMgrDetail);
 
@@ -608,18 +623,18 @@ function showMgrDetail(mgrName){
   for(var i=0;i<completedDeals.length;i++){if(completedDeals[i].manager===mgrName){compList.push(completedDeals[i]);}}
   if(progList.length===0&&compList.length===0){mdArea.innerHTML='<div class="detail-box" style="text-align:center;color:#999;">해당 담당자 기업 없음</div>';return;}
   var h='<div class="detail-box">';
+  if(progList.length>0){
+    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;">검토중</div><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
+    for(var i=0;i<progList.length;i++){var c=progList[i];h+='<tr><td><strong>'+c.name+'</strong></td><td>'+getTotalAmt(c)+'억</td><td>'+STAGES[getCur(c).stage]+'</td></tr>';}
+    h+='</tbody></table>';
+  }
   if(compList.length>0){
-    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;">투자완료</div><table><thead><tr><th>기업명</th><th>조합</th><th>금액</th><th>완료일</th></tr></thead><tbody>';
+    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;'+(progList.length>0?'margin-top:8px;':'')+'">투자완료</div><table><thead><tr><th>기업명</th><th>조합</th><th>금액</th><th>완료일</th></tr></thead><tbody>';
     for(var i=0;i<compList.length;i++){
       var d=compList[i];
       var fShort=d.fund?fundInfo(d.fund).short:'-';
       h+='<tr><td><strong>'+d.company+'</strong></td><td>'+fShort+'</td><td>'+d.amount+'억</td><td>'+d.date+'</td></tr>';
     }
-    h+='</tbody></table>';
-  }
-  if(progList.length>0){
-    h+='<div style="font-size:0.7rem;font-weight:600;color:#555;margin-bottom:4px;'+(compList.length>0?'margin-top:8px;':'')+'">검토중</div><table><thead><tr><th>기업명</th><th>금액</th><th>현재 단계</th></tr></thead><tbody>';
-    for(var i=0;i<progList.length;i++){var c=progList[i];h+='<tr><td><strong>'+c.name+'</strong></td><td>'+getTotalAmt(c)+'억</td><td>'+STAGES[getCur(c).stage]+'</td></tr>';}
     h+='</tbody></table>';
   }
   h+='</div>';
@@ -765,15 +780,16 @@ function renderKanban(){
   var h='';
   for(var si=0;si<STAGE_KEYS.length;si++){
     var sk=STAGE_KEYS[si],list=g[sk],amt=0;for(var i=0;i<list.length;i++)amt+=getTotalAmt(list[i]);
-    h+='<div class="kanban-col"><div class="kanban-col-header"><div class="col-title">'+STAGES[sk]+'</div><div class="col-stat">'+list.length+'개사 · '+amt+'억</div></div><div class="kanban-cards">';
+    h+='<div class="kanban-col"><div class="kanban-col-header"><div class="col-title">'+STAGES[sk]+' 완료</div><div class="col-stat">'+list.length+'개사 · '+amt+'억</div></div><div class="kanban-cards">';
     for(var i=0;i<list.length;i++){
       var c=list[i],cur=getCur(c),ci=sIdx(cur.stage),ed=cur.date?(cur.date.slice(5).replace('-','/')):'',ta=getTotalAmt(c);
-      var bar='<div class="kc-bar">';for(var j=0;j<3;j++){if(j<ci)bar+='<div class="seg seg-done"></div>';else if(j===ci)bar+='<div class="seg seg-current"></div>';else bar+='<div class="seg seg-future"></div>';}bar+='</div>';
-      var fdHtml='';if(c.fundAllocs&&c.fundAllocs.length>0){fdHtml='<div class="kc-fund-detail">';for(var ai=0;ai<c.fundAllocs.length;ai++){var a=c.fundAllocs[ai],fii=fundInfo(a.fund);if(ai>0)fdHtml+=' / ';fdHtml+=fii.short+' '+a.amount+'억';}fdHtml+='</div>';}
       var fns=getFundNames(c),mns=getMgrNames(c);
-      var fundLine='';if(fns.length>0){fundLine='<div class="kc-badges">';for(var fi2=0;fi2<fns.length;fi2++){var finfo=fundInfo(fns[fi2]);fundLine+=badgeS(finfo.short,finfo);}fundLine+='</div>';}
-      var mgrLine='';if(mns.length>0){mgrLine='<div class="kc-badges" style="margin-top:3px;">';for(var mi2=0;mi2<mns.length;mi2++){mgrLine+=badgeS(mns[mi2],mgrInfo(mns[mi2]));}mgrLine+='</div>';}
-      h+='<div class="kanban-card" onclick="openDetail(\''+c.id+'\')"><div class="kc-name">'+c.name+'</div><div class="kc-amount">'+ta+'억</div>'+fdHtml+'<div class="kc-date">진입: '+ed+'</div>'+bar+fundLine+mgrLine+'</div>';
+      // 조합 배지에 금액 포함 (텍스트 중복 제거)
+      var fundLine='';
+      if(c.fundAllocs&&c.fundAllocs.length>0){fundLine='<div class="kc-badges">';for(var ai=0;ai<c.fundAllocs.length;ai++){var a=c.fundAllocs[ai];if(!a.fund)continue;var fii=fundInfo(a.fund);fundLine+=badgeS(fii.short+' '+a.amount+'억',fii);}fundLine+='</div>';}
+      else if(fns.length>0){fundLine='<div class="kc-badges">';for(var fi2=0;fi2<fns.length;fi2++){var finfo=fundInfo(fns[fi2]);fundLine+=badgeS(finfo.short,finfo);}fundLine+='</div>';}
+      var mgrLine='';if(mns.length>0){mgrLine='<div class="kc-badges" style="margin-top:5px;">';for(var mi2=0;mi2<mns.length;mi2++){mgrLine+=badgeS(mns[mi2],mgrInfo(mns[mi2]));}mgrLine+='</div>';}
+      h+='<div class="kanban-card" onclick="openDetail(\''+c.id+'\')"><div class="kc-top"><span class="kc-name">'+c.name+'</span><span class="kc-amount num">'+ta+'억</span></div><div class="kc-date">완료 '+ed+'</div>'+fundLine+mgrLine+'</div>';
     }
     h+='</div></div>';
   }
@@ -791,11 +807,9 @@ function renderMilestones(){
     var nd=c.plannedNext&&c.plannedNext.date?(c.plannedNext.date.slice(5).replace('-','/')):'미정';
     var dd=c.plannedNext&&c.plannedNext.date?ddayCalc(c.plannedNext.date):null;
     var ddH='';if(dd===null)ddH='<span class="dday-badge dday-none">미정</span>';else if(dd<0)ddH='<span class="dday-badge dday-urgent">D+'+Math.abs(dd)+'</span>';else if(dd<=7)ddH='<span class="dday-badge dday-urgent">D-'+dd+'</span>';else ddH='<span class="dday-badge dday-normal">D-'+dd+'</span>';
-    var dots='<div class="progress-dots">';for(var j=0;j<3;j++)dots+='<span class="'+(j<=ci?'active':'')+'"></span>';dots+='</div>';
-    var fns=getFundNames(c),mns=getMgrNames(c);
-    var fB='';if(fns.length>0){for(var fi=0;fi<fns.length;fi++){var finfo=fundInfo(fns[fi]);fB+=badgeS(finfo.short,finfo)+' ';}}else fB='<span style="color:#ccc">-</span>';
-    var mB='';if(mns.length>0){for(var mi=0;mi<mns.length;mi++)mB+=badgeS(mns[mi],mgrInfo(mns[mi]))+' ';}else mB='<span style="color:#ccc">-</span>';
-    h+='<tr onclick="openDetail(\''+c.id+'\')"><td><strong>'+c.name+'</strong></td><td>'+fB+'</td><td>'+mB+'</td><td><span class="stage-badge badge-'+cur.stage+'">'+STAGES[cur.stage]+'</span></td><td>'+ta+'억</td><td>'+nl+' · '+nd+'</td><td>'+ddH+'</td><td>'+dots+'</td></tr>';
+    var mns=getMgrNames(c);
+    var mB='';if(mns.length>0){for(var mi=0;mi<mns.length;mi++)mB+=badgeS(mns[mi],mgrInfo(mns[mi]))+' ';}else mB='<span style="color:var(--ink-3)">-</span>';
+    h+='<tr onclick="openDetail(\''+c.id+'\')"><td><strong>'+c.name+'</strong></td><td>'+mB+'</td><td><span class="stage-badge">'+STAGES[cur.stage]+'</span></td><td class="num">'+ta+'억</td><td class="num">'+nl+' · '+nd+'</td><td>'+ddH+'</td></tr>';
   }
   el.innerHTML=h;
 }
@@ -826,7 +840,7 @@ function openAddModal(){
 }
 
 function buildAddHistoryHTML(){
-  var h='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
+  var h='<div class="detail-section"><h3>단계별 완료 이력</h3><div class="history-timeline">';
   if(addTempHistory.length>0){
     var sorted=addTempHistory.slice();
     sorted.sort(function(a,b){if(a.date===b.date)return sIdx(b.stage)-sIdx(a.stage);return a.date>b.date?-1:a.date<b.date?1:0;});
@@ -975,7 +989,7 @@ function renderDetailModal(id){
   var h='<h2>'+c.name+'</h2><div class="form-row" style="margin-bottom:12px;"><div class="form-group"><label>기업명</label><input id="dName" value="'+(c.name||'')+'"></div><div class="form-group"><label>비고</label><input id="dNote" value="'+(c.note||'')+'"></div></div>';
   h+='<div class="alloc-section"><h4>조합별 투자금액</h4><div id="detailAllocRows"></div><button class="alloc-add" onclick="addDetailAllocRow()">+ 조합 추가</button></div>';
   h+='<div class="form-group" style="margin-top:12px;"><label>담당자 (복수 선택)</label><div id="detailMgrChips"></div></div>';
-  h+='<div class="detail-section"><h3>단계별 진입 이력</h3><div class="history-timeline">';
+  h+='<div class="detail-section"><h3>단계별 완료 이력</h3><div class="history-timeline">';
   if(tempHistory.length>0){
     var sorted=tempHistory.slice();
     sorted.sort(function(a,b){if(a.date===b.date)return sIdx(b.stage)-sIdx(a.stage);return a.date>b.date?-1:a.date<b.date?1:0;});
@@ -997,7 +1011,7 @@ function renderDetailModal(id){
   h+='<div class="detail-section"><h3>다음 예상 단계</h3><div class="next-stage-row"><div class="ns-group"><label>단계</label><select id="nextStageSelect"><option value="">미정</option>';
   for(var i=0;i<STAGE_KEYS.length;i++)h+='<option value="'+STAGE_KEYS[i]+'" '+(c.plannedNext&&c.plannedNext.stage===STAGE_KEYS[i]?'selected':'')+'>'+STAGES[STAGE_KEYS[i]]+'</option>';
   h+='</select></div><div class="ns-group"><label>예정일</label><input type="date" id="nextStageDate" value="'+(c.plannedNext&&c.plannedNext.date?c.plannedNext.date:'')+'"></div></div><div class="next-stage-hint">예정일이 없으면 미정으로 표시됩니다.</div></div>';
-  h+='<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal(\''+id+'\')">이 기업 삭제</button><button class="btn btn-sm" style="border-color:#2e7d32;color:#2e7d32;" onclick="moveToCompleted(\''+id+'\')">투자완료 기록</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveDetail(\''+id+'\')">수정</button></div></div>';
+  h+='<div class="detail-actions"><div class="detail-actions-left"><button class="btn btn-sm btn-danger" onclick="deleteDeal(\''+id+'\')">이 기업 삭제</button><button class="btn btn-sm" style="border-color:var(--navy-mid);color:var(--navy);font-weight:700;" onclick="moveToCompleted(\''+id+'\')">투자완료로 이동</button></div><div class="detail-actions-right"><button class="btn btn-sm" onclick="closeDetailModal()">취소</button><button class="btn btn-sm btn-primary" onclick="saveDetail(\''+id+'\')">수정</button></div></div>';
   document.getElementById('detailModalContent').innerHTML=h;
   allocPurposes={};
   var allocs=c.fundAllocs&&c.fundAllocs.length>0?c.fundAllocs:[{fund:c.fund||'',amount:c.amount||0,purposes:[]}];
